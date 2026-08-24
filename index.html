@@ -21,7 +21,6 @@
     <div class="card p-4 shadow-lg" style="width: 350px; border-radius: 15px;">
         <div class="text-center mb-4"><h4 class="fw-bold text-primary">Aetra Smart Connect</h4><p class="text-muted small">Admin Panel</p></div>
         <input type="text" id="username" class="form-control mb-3" placeholder="Username (admin)">
-        <!-- Tambahan fitur "Enter" ada di ID password ini -->
         <input type="password" id="password" class="form-control mb-3" placeholder="Password (admin123)" onkeypress="if(event.key === 'Enter') cekLogin()">
         <button class="btn btn-primary w-100 fw-bold" onclick="cekLogin()">Login Masuk</button>
         <p id="error-login" class="text-danger text-center mt-3 mb-0 small hide">Gagal Login! Cek Username/Password.</p>
@@ -118,8 +117,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // ===================================================================
-    // ⚠️ PERHATIKAN TANDA KUTIP TUNGGAL (' ') DI BAWAH INI!
     // ===================================================================
     const SUPABASE_URL = 'https://vyngziqwsdhetapjzlgr.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5bmd6aXF3c2RoZXRhcGp6bGdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4ODE0ODIsImV4cCI6MjEwMjQ1NzQ4Mn0._uJcP6YPkXH6mQmIHW-vrKOZIguHGKI_72zEWYei24s';
@@ -230,9 +227,7 @@
             
             let tglMasuk = row.riwayat_tgl && row.riwayat_tgl["1"] ? row.riwayat_tgl["1"].split(',')[0] : "-";
             let tglBayar = row.riwayat_tgl && row.riwayat_tgl["2"] ? row.riwayat_tgl["2"].split(',')[0] : "-";
-            
-            let tglPasang = (row.riwayat_tgl && row.riwayat_tgl.detail_pemasangan && row.riwayat_tgl.detail_pemasangan.jadwal) 
-                            ? formatTanggal(row.riwayat_tgl.detail_pemasangan.jadwal) : "-";
+            let tglPasang = (row.riwayat_tgl && row.riwayat_tgl.detail_pemasangan && row.riwayat_tgl.detail_pemasangan.jadwal) ? formatTanggal(row.riwayat_tgl.detail_pemasangan.jadwal) : "-";
             
             let slaHtml = "-";
             if ((row.status === "Pembayaran Diterima" || row.status === "Proses Pemasangan") && row.riwayat_tgl && row.riwayat_tgl.tgl_bayar_ts) {
@@ -252,7 +247,11 @@
                 slaHtml = `<span class="badge bg-success badge-sla">Tuntas</span>`; 
             }
 
-            const linkTracker = `${window.location.origin}/customer_tracking.html?id=${row.id}`;
+            // PERBAIKAN LINK AGAR MENDETEKSI FOLDER GITHUB OTOMATIS
+            let currentUrl = window.location.href.split('?')[0].replace('index.html', '');
+            if (!currentUrl.endsWith('/')) currentUrl += '/';
+            const linkTracker = `${currentUrl}customer_tracking.html?id=${row.id}`;
+
             let btnDetailPasang = (row.status === "Proses Pemasangan") ? `<button class="btn btn-sm btn-info w-100 fw-bold mt-1" onclick="bukaModalPemasangan('${row.id}')">⚙️ Detail Pasang</button>` : '';
 
             const tr = document.createElement("tr");
