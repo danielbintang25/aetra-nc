@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aetra - Admin Dashboard NC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #0056b3; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .hide { display: none !important; }
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255,255,255,0.8); z-index: 9998; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: #0056b3;}
+        .badge-sla { font-size: 12px; padding: 5px 8px; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-light">
+
+<div id="loading-overlay">Menyambungkan ke Database Server...</div>
+
+<div id="login-screen">
+    <div class="card p-4 shadow-lg" style="width: 350px; border-radius: 15px;">
+        <div class="text-center mb-4"><h4 class="fw-bold text-primary">Aetra Smart Connect</h4><p class="text-muted small">Admin Panel</p></div>
+        <input type="text" id="username" class="form-control mb-3" placeholder="Username (admin)">
+        <!-- Tambahan fitur "Enter" ada di ID password ini -->
+        <input type="password" id="password" class="form-control mb-3" placeholder="Password (admin123)" onkeypress="if(event.key === 'Enter') cekLogin()">
+        <button class="btn btn-primary w-100 fw-bold" onclick="cekLogin()">Login Masuk</button>
+        <p id="error-login" class="text-danger text-center mt-3 mb-0 small hide">Gagal Login! Cek Username/Password.</p>
+    </div>
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #0056b3;">
+    <div class="container-fluid"><a class="navbar-brand fw-bold" href="#">Aetra Smart Connect - Admin Panel</a><button class="btn btn-danger btn-sm fw-bold" onclick="logout()">Logout</button></div>
+</nav>
+
+<div class="container-fluid mt-4 px-4">
+    <div class="row mb-4">
+        <div class="col-md-4"><div class="card text-white bg-primary shadow-sm"><div class="card-body"><h6 class="card-title">Total Pendaftaran (Filter)</h6><h2 id="kpi-total">0</h2></div></div></div>
+        <div class="col-md-4"><div class="card text-white bg-warning text-dark shadow-sm"><div class="card-body"><h6 class="card-title">Pembayaran Diterima</h6><h2 id="kpi-bayar">0</h2></div></div></div>
+        <div class="col-md-4"><div class="card text-white bg-success shadow-sm"><div class="card-body"><h6 class="card-title">Pemasangan Selesai</h6><h2 id="kpi-selesai">0</h2></div></div></div>
+    </div>
+
+    <div class="row mb-3 bg-white p-3 shadow-sm rounded align-items-end">
+        <div class="col-md-2 mb-2 mb-md-0"><label class="form-label small fw-bold text-muted">Status:</label><select id="filterStatus" class="form-select border-primary" onchange="renderTabel()"><option value="Semua">Semua Status</option><option value="Pendaftaran Diterima">Pendaftaran Diterima</option><option value="Pembayaran Diterima">Pembayaran Diterima</option><option value="Proses Pemasangan">Proses Pemasangan</option><option value="Selesai">Selesai</option></select></div>
+        <div class="col-md-2 mb-2 mb-md-0"><label class="form-label small fw-bold text-muted">Bulan Masuk:</label><select id="filterBulan" class="form-select border-primary" onchange="renderTabel()"><option value="Semua">Semua Bulan</option><option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option><option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option></select></div>
+        <div class="col-md-2 mb-2 mb-md-0"><label class="form-label small fw-bold text-muted">Tahun Masuk:</label><select id="filterTahun" class="form-select border-primary" onchange="renderTabel()"><option value="Semua">Semua Tahun</option><option value="2026">2026</option><option value="2027">2027</option></select></div>
+        <div class="col-md-2 mb-2 mb-md-0"><label class="form-label small fw-bold text-muted">Urutkan Data:</label><select id="sortTanggal" class="form-select border-primary" onchange="renderTabel()"><option value="baru">Paling Baru ke Lama</option><option value="lama">Paling Lama ke Baru</option></select></div>
+        <div class="col-md-2 mb-2 mb-md-0"><label class="form-label small fw-bold text-muted">Cari No. Form / Nama:</label><input type="text" id="searchInput" class="form-control border-primary" placeholder="Ketik pencarian..." onkeyup="renderTabel()"></div>
+        <div class="col-md-2 text-md-end"><button class="btn btn-primary fw-bold w-100" onclick="bukaModalTambah()">+ Tambah Data</button></div>
+    </div>
+    
+    <div class="card shadow-sm mb-5">
+        <div class="card-body overflow-auto">
+            <table class="table table-hover align-middle" style="font-size: 14px;">
+                <thead class="table-primary">
+                    <tr><th>No.</th><th>No. Form</th><th>Tgl Masuk</th><th>Tgl Bayar</th><th>Tgl Pasang</th><th>SLA Pasang</th><th>Nama</th><th>No. HP</th><th style="min-width: 170px;">Status</th><th class="text-center" style="min-width: 220px;">Aksi</th></tr>
+                </thead>
+                <tbody id="tabel-pelanggan"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalForm" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white"><h5 class="modal-title" id="modalTitle">Registrasi Sambungan Baru</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="mb-3"><label class="form-label">No. Form</label><input type="text" id="inputNoForm" class="form-control" placeholder="Cth: F-001"><small class="text-muted" id="infoNoForm">Masukkan nomor form fisik.</small></div>
+        <div class="mb-3"><label class="form-label">Nama Lengkap</label><input type="text" id="inputNama" class="form-control" placeholder="Masukkan Nama"></div>
+        <div class="mb-3"><label class="form-label">No. Telepon (WhatsApp)</label><input type="text" id="inputTelepon" class="form-control" placeholder="Cth: 08123456789"></div>
+        <div class="mb-3"><label class="form-label">Alamat Lengkap</label><input type="text" id="inputAlamat" class="form-control" placeholder="Cth: Perumahan Karawaci..."></div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="button" id="btnSimpan" class="btn btn-primary" onclick="simpanPelanggan()">Simpan Data</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalPemasangan" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-dark"><h5 class="modal-title fw-bold">⚙️ Detail Operasional Pemasangan</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <input type="hidden" id="pm_id">
+        <h6 class="fw-bold text-primary border-bottom pb-2">1. Data Internal</h6>
+        <div class="mb-2"><label class="form-label small">Tanggal Cetak SO (Internal)</label><input type="date" id="pm_tgl_so" class="form-control form-control-sm"></div>
+        <div class="mb-3"><label class="form-label small">Nama Tim/Kontraktor Pelaksana</label><input type="text" id="pm_kontraktor" class="form-control form-control-sm" placeholder="Ketik nama tim..."></div>
+        
+        <h6 class="fw-bold text-primary border-bottom pb-2">2. Laporan Lapangan (Tampil ke Pelanggan)</h6>
+        <div class="mb-2"><label class="form-label small text-success fw-bold">Tanggal Pemasangan</label><input type="date" id="pm_jadwal" class="form-control form-control-sm"></div>
+        <div class="mb-2">
+            <label class="form-label small">Kondisi Lapangan</label>
+            <select id="pm_kondisi" class="form-select form-select-sm border-warning" onchange="toggleKendala()">
+                <option value="">-- Belum Ada Laporan --</option>
+                <option value="Sukses">✅ Berjalan Lancar / Sukses</option>
+                <option value="Tertunda">⏳ Tertunda (Pending)</option>
+                <option value="Gagal">❌ Gagal / Batal</option>
+            </select>
+        </div>
+        <div id="boxKendala" class="hide p-2 bg-light border rounded">
+            <div class="mb-2">
+                <label class="form-label small text-danger fw-bold">Kategori Kendala</label>
+                <select id="pm_kategori" class="form-select form-select-sm">
+                    <option value="">-- Pilih Kategori --</option>
+                    <option value="Menunggu konfirmasi akses lokasi dari pelanggan">Menunggu akses lokasi pelanggan</option>
+                    <option value="Kendala teknis di lapangan (cuaca / material)">Kendala teknis (cuaca/material)</option>
+                    <option value="Penjadwalan ulang sesuai permintaan pelanggan">Permintaan jadwal ulang</option>
+                    <option value="Lainnya, hubungi CS">Lainnya (Hubungi CS)</option>
+                </select>
+            </div>
+            <div id="boxJadwalUlang" class="mb-2 hide"><label class="form-label small text-info fw-bold">Tanggal Janji/Jadwal Ulang</label><input type="date" id="pm_tgl_kembali" class="form-control form-control-sm"></div>
+            <div class="mb-2"><label class="form-label small">Catatan Tambahan Admin</label><textarea id="pm_catatan" class="form-control form-control-sm" rows="2" placeholder="Ketikan detail untuk dibaca pelanggan..."></textarea></div>
+        </div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button><button type="button" class="btn btn-primary fw-bold" onclick="simpanDetailPemasangan()">Simpan & Update Pelanggan</button></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ===================================================================
+    // ⚠️ PERHATIKAN TANDA KUTIP TUNGGAL (' ') DI BAWAH INI!
+    // ===================================================================
+    const SUPABASE_URL = 'https://vyngziqwsdhetapjzlgr.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5bmd6aXF3c2RoZXRhcGp6bGdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4ODE0ODIsImV4cCI6MjEwMjQ1NzQ4Mn0._uJcP6YPkXH6mQmIHW-vrKOZIguHGKI_72zEWYei24s';
+    // ===================================================================
+
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let dbPelanggan = [];
+    let modalInstance = new bootstrap.Modal(document.getElementById('modalForm'));
+    let modalPemasanganIns = new bootstrap.Modal(document.getElementById('modalPemasangan'));
+    let modeEditId = null; 
+
+    if(sessionStorage.getItem('isLoggedIn') === 'true') { document.getElementById('login-screen').classList.add('hide'); }
+    
+    function cekLogin() {
+        if(document.getElementById('username').value === 'admin' && document.getElementById('password').value === 'admin123') {
+            sessionStorage.setItem('isLoggedIn', 'true'); document.getElementById('login-screen').classList.add('hide');
+        } else { document.getElementById('error-login').classList.remove('hide'); }
+    }
+    
+    function logout() { sessionStorage.removeItem('isLoggedIn'); window.location.reload(); }
+
+    function getTanggalSekarang() {
+        const bln = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Ags","Sep","Okt","Nov","Des"];
+        const d = new Date(); 
+        let jam = d.getHours().toString().padStart(2, '0'); let mnt = d.getMinutes().toString().padStart(2, '0');
+        return `${d.getDate()} ${bln[d.getMonth()]} ${d.getFullYear()}, ${jam}:${mnt} WIB`;
+    }
+
+    function formatTanggal(tglStr) {
+        if(!tglStr) return "-";
+        const bln = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Ags","Sep","Okt","Nov","Des"];
+        let d = new Date(tglStr);
+        return `${d.getDate()} ${bln[d.getMonth()]} ${d.getFullYear()}`;
+    }
+
+    function hitungHariKerja(startDateTs) {
+        let start = new Date(startDateTs); let today = new Date(); let count = 0;
+        let cur = new Date(start); cur.setHours(0,0,0,0); today.setHours(0,0,0,0);
+        while(cur <= today) {
+            let day = cur.getDay();
+            if(day !== 0 && day !== 6) count++;
+            cur.setDate(cur.getDate() + 1);
+        }
+        return count > 0 ? count : 1; 
+    }
+
+    function isSlaPending(tglBayarTs, jadwalStr) {
+        if (!tglBayarTs || !jadwalStr) return false;
+        let start = new Date(tglBayarTs);
+        let added = 0;
+        while(added < 14) {
+            start.setDate(start.getDate() + 1);
+            let day = start.getDay();
+            if(day !== 0 && day !== 6) added++;
+        }
+        start.setHours(23, 59, 59, 999);
+        let jadwal = new Date(jadwalStr);
+        return jadwal > start;
+    }
+
+    async function fetchDatabase() {
+        document.getElementById('loading-overlay').classList.remove('hide');
+        const { data, error } = await _supabase.from('pelanggan').select('*');
+        if (error) { alert("Koneksi ke Database Gagal! Coba cek API Key."); console.error(error); } 
+        else { dbPelanggan = data; renderTabel(); }
+        document.getElementById('loading-overlay').classList.add('hide');
+    }
+
+    function findIndexById(id) { return dbPelanggan.findIndex(p => p.id === id); }
+
+    function renderTabel() {
+        const tbody = document.getElementById("tabel-pelanggan"); tbody.innerHTML = ""; 
+        let fStatus = document.getElementById("filterStatus").value; 
+        let fBulan = document.getElementById("filterBulan").value; 
+        let fTahun = document.getElementById("filterTahun").value; 
+        let fSort = document.getElementById("sortTanggal").value;
+        let searchQ = document.getElementById("searchInput").value.toLowerCase(); 
+
+        let dataTampil = dbPelanggan.filter(p => {
+            let passStatus = (fStatus === "Semua") || (p.status === fStatus);
+            let d = new Date(p.tgl_buat);
+            let passBulan = (fBulan === "Semua") || (d.getMonth().toString() === fBulan);
+            let passTahun = (fTahun === "Semua") || (d.getFullYear().toString() === fTahun);
+            let passSearch = (p.id.toLowerCase().includes(searchQ) || p.nama.toLowerCase().includes(searchQ));
+            return passStatus && passBulan && passTahun && passSearch;
+        });
+
+        let selesaiData = dataTampil.filter(p => p.status === "Selesai");
+        let totalSelesai = selesaiData.length;
+        let totalGagal = selesaiData.filter(p => p.riwayat_tgl && p.riwayat_tgl.detail_pemasangan && p.riwayat_tgl.detail_pemasangan.kondisi === "Gagal").length;
+        let totalSukses = totalSelesai - totalGagal;
+
+        document.getElementById("kpi-total").innerText = dataTampil.length;
+        document.getElementById("kpi-bayar").innerText = dataTampil.filter(p => p.status === "Pembayaran Diterima").length;
+        document.getElementById("kpi-selesai").innerHTML = `${totalSelesai} <br><small class="fs-6 fw-normal d-block mt-1">(Sukses: ${totalSukses} | Gagal: ${totalGagal})</small>`;
+
+        dataTampil.sort((a, b) => fSort === "baru" ? (b.tgl_buat - a.tgl_buat) : (a.tgl_buat - b.tgl_buat));
+
+        let nomorUrut = 1;
+        dataTampil.forEach((row) => {
+            let statusColor = "bg-secondary";
+            if(row.status === "Pembayaran Diterima") statusColor = "bg-primary";
+            if(row.status === "Pendaftaran Diterima") statusColor = "bg-info text-dark";
+            if(row.status === "Selesai") statusColor = "bg-success";
+
+            const statusMap = { "Pendaftaran Diterima": 1, "Pembayaran Diterima": 2, "Proses Pemasangan": 3, "Selesai": 4 };
+            
+            let tglMasuk = row.riwayat_tgl && row.riwayat_tgl["1"] ? row.riwayat_tgl["1"].split(',')[0] : "-";
+            let tglBayar = row.riwayat_tgl && row.riwayat_tgl["2"] ? row.riwayat_tgl["2"].split(',')[0] : "-";
+            
+            let tglPasang = (row.riwayat_tgl && row.riwayat_tgl.detail_pemasangan && row.riwayat_tgl.detail_pemasangan.jadwal) 
+                            ? formatTanggal(row.riwayat_tgl.detail_pemasangan.jadwal) : "-";
+            
+            let slaHtml = "-";
+            if ((row.status === "Pembayaran Diterima" || row.status === "Proses Pemasangan") && row.riwayat_tgl && row.riwayat_tgl.tgl_bayar_ts) {
+                let pendingStatus = false;
+                if (row.riwayat_tgl.detail_pemasangan && row.riwayat_tgl.detail_pemasangan.jadwal) {
+                    pendingStatus = isSlaPending(row.riwayat_tgl.tgl_bayar_ts, row.riwayat_tgl.detail_pemasangan.jadwal);
+                }
+
+                if (pendingStatus) {
+                    slaHtml = `<span class="badge bg-secondary badge-sla">Pending</span>`;
+                } else {
+                    let hKerja = hitungHariKerja(row.riwayat_tgl.tgl_bayar_ts);
+                    if (hKerja <= 14) { slaHtml = `<span class="badge bg-warning text-dark badge-sla">Hr ke-${hKerja}/14</span>`; } 
+                    else { slaHtml = `<span class="badge bg-danger badge-sla">Lewat (${hKerja}/14)</span>`; }
+                }
+            } else if (row.status === "Selesai") { 
+                slaHtml = `<span class="badge bg-success badge-sla">Tuntas</span>`; 
+            }
+
+            const linkTracker = `${window.location.origin}/customer_tracking.html?id=${row.id}`;
+            let btnDetailPasang = (row.status === "Proses Pemasangan") ? `<button class="btn btn-sm btn-info w-100 fw-bold mt-1" onclick="bukaModalPemasangan('${row.id}')">⚙️ Detail Pasang</button>` : '';
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td class="fw-bold">${nomorUrut++}</td><td class="fw-bold text-primary">${row.id}</td>
+                <td class="small fw-bold text-muted">${tglMasuk}</td>
+                <td class="small fw-bold text-success">${tglBayar}</td>
+                <td class="small fw-bold" style="color: #0056b3;">${tglPasang}</td>
+                <td class="text-center">${slaHtml}</td>
+                <td class="fw-bold">${row.nama}</td><td class="small">${row.telepon}</td>
+                <td>
+                    <select class="form-select form-select-sm border-${statusColor.split(' ')[0].replace('bg-', '')}" onchange="updateStatus('${row.id}', this.value)">
+                        <option value="Pendaftaran Diterima" ${row.status == 'Pendaftaran Diterima' ? 'selected' : ''}>Pendaftaran Diterima</option>
+                        <option value="Pembayaran Diterima" ${row.status == 'Pembayaran Diterima' ? 'selected' : ''}>Pembayaran Diterima</option>
+                        <option value="Proses Pemasangan" ${row.status == 'Proses Pemasangan' ? 'selected' : ''}>Proses Pemasangan</option>
+                        <option value="Selesai" ${row.status == 'Selesai' ? 'selected' : ''}>Selesai</option>
+                    </select>
+                    ${btnDetailPasang}
+                </td>
+                <td class="text-center">
+                    <div class="btn-group w-100 mb-1"><button class="btn btn-sm btn-warning" onclick="bukaModalEdit('${row.id}')">Edit</button><button class="btn btn-sm btn-danger" onclick="hapusPelanggan('${row.id}')">Hapus</button><a href="${linkTracker}" target="_blank" class="btn btn-sm btn-outline-primary">Buka Link</a></div>
+                    <button class="btn btn-sm btn-success w-100 fw-bold" onclick="kirimWA('${row.id}', '${linkTracker}')">📲 WA</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function bukaModalTambah() { modeEditId = null; document.getElementById("modalTitle").innerText = "Registrasi Baru"; document.getElementById("inputNoForm").value = ""; document.getElementById("inputNoForm").disabled = false; document.getElementById("inputNama").value = ""; document.getElementById("inputTelepon").value = ""; document.getElementById("inputAlamat").value = ""; modalInstance.show(); }
+    function bukaModalEdit(id) { modeEditId = id; let i = findIndexById(id); document.getElementById("modalTitle").innerText = "Edit Pelanggan"; document.getElementById("inputNoForm").value = dbPelanggan[i].id; document.getElementById("inputNoForm").disabled = true; document.getElementById("inputNama").value = dbPelanggan[i].nama; document.getElementById("inputTelepon").value = dbPelanggan[i].telepon; document.getElementById("inputAlamat").value = dbPelanggan[i].alamat; modalInstance.show(); }
+
+    async function simpanPelanggan() {
+        let noForm = document.getElementById("inputNoForm").value, nama = document.getElementById("inputNama").value, telepon = document.getElementById("inputTelepon").value, alamat = document.getElementById("inputAlamat").value;
+        if(noForm === "" || nama === "" || telepon === "" || alamat === "") { alert("Wajib diisi semua!"); return; }
+        document.getElementById('loading-overlay').classList.remove('hide');
+
+        if (modeEditId === null) {
+            if (dbPelanggan.find(p => p.id === noForm)) { alert("Nomor Form sudah terdaftar!"); document.getElementById('loading-overlay').classList.add('hide'); return; }
+            let riwayat = {"1": getTanggalSekarang(), "2": "", "3": "", "4": ""};
+            await _supabase.from('pelanggan').insert([{ id: noForm, nama: nama, telepon: telepon, alamat: alamat, status: "Pendaftaran Diterima", tgl_buat: Date.now(), riwayat_tgl: riwayat }]);
+        } else {
+            await _supabase.from('pelanggan').update({ nama: nama, telepon: telepon, alamat: alamat }).eq('id', modeEditId);
+        }
+        modalInstance.hide(); fetchDatabase(); 
+    }
+
+    async function updateStatus(id, statusBaru) {
+        document.getElementById('loading-overlay').classList.remove('hide');
+        let index = findIndexById(id);
+        let riwayatBaru = dbPelanggan[index].riwayat_tgl || {"1": "", "2": "", "3": "", "4": ""};
+        const statusMap = { "Pendaftaran Diterima": 1, "Pembayaran Diterima": 2, "Proses Pemasangan": 3, "Selesai": 4 };
+        let stepAktif = statusMap[statusBaru];
+        
+        riwayatBaru[stepAktif.toString()] = getTanggalSekarang();
+        for (let i = stepAktif + 1; i <= 4; i++) { riwayatBaru[i.toString()] = ""; }
+
+        if ((statusBaru === "Pembayaran Diterima" || statusBaru === "Proses Pemasangan") && !riwayatBaru["tgl_bayar_ts"]) {
+            riwayatBaru["tgl_bayar_ts"] = Date.now();
+        }
+        
+        if (stepAktif < 2) { delete riwayatBaru["tgl_bayar_ts"]; }
+
+        await _supabase.from('pelanggan').update({ status: statusBaru, riwayat_tgl: riwayatBaru }).eq('id', id);
+        fetchDatabase();
+        if (statusBaru === "Proses Pemasangan") { setTimeout(() => { bukaModalPemasangan(id); }, 500); }
+    }
+
+    function toggleKendala() {
+        let v = document.getElementById('pm_kondisi').value;
+        document.getElementById('boxKendala').classList.toggle('hide', v !== 'Tertunda' && v !== 'Gagal');
+        document.getElementById('boxJadwalUlang').classList.toggle('hide', v !== 'Tertunda');
+    }
+
+    function bukaModalPemasangan(id) {
+        let p = dbPelanggan[findIndexById(id)];
+        let det = p.riwayat_tgl.detail_pemasangan || {};
+        document.getElementById('pm_id').value = id;
+        document.getElementById('pm_tgl_so').value = det.tgl_so || "";
+        document.getElementById('pm_kontraktor').value = det.kontraktor || "";
+        document.getElementById('pm_jadwal').value = det.jadwal || "";
+        document.getElementById('pm_kondisi').value = det.kondisi || "";
+        document.getElementById('pm_kategori').value = det.kategori || "";
+        document.getElementById('pm_catatan').value = det.catatan || "";
+        document.getElementById('pm_tgl_kembali').value = det.tgl_kembali || ""; 
+        toggleKendala();
+        modalPemasanganIns.show();
+    }
+
+    async function simpanDetailPemasangan() {
+        document.getElementById('loading-overlay').classList.remove('hide');
+        let id = document.getElementById('pm_id').value;
+        let index = findIndexById(id);
+        let riwayatBaru = dbPelanggan[index].riwayat_tgl;
+        
+        riwayatBaru.detail_pemasangan = {
+            tgl_so: document.getElementById('pm_tgl_so').value,
+            kontraktor: document.getElementById('pm_kontraktor').value,
+            jadwal: document.getElementById('pm_jadwal').value,
+            kondisi: document.getElementById('pm_kondisi').value,
+            kategori: document.getElementById('pm_kategori').value,
+            catatan: document.getElementById('pm_catatan').value,
+            tgl_kembali: document.getElementById('pm_tgl_kembali').value
+        };
+
+        await _supabase.from('pelanggan').update({ riwayat_tgl: riwayatBaru }).eq('id', id);
+        modalPemasanganIns.hide();
+        fetchDatabase();
+    }
+
+    async function hapusPelanggan(id) {
+        if(confirm("Yakin ingin menghapus?")) { document.getElementById('loading-overlay').classList.remove('hide'); await _supabase.from('pelanggan').delete().eq('id', id); fetchDatabase(); }
+    }
+
+    function kirimWA(id, linkPintar) {
+        let p = dbPelanggan[findIndexById(id)];
+        let noHP = p.telepon.startsWith('0') ? '62' + p.telepon.substring(1) : p.telepon;
+        let pesanTeks = `Halo *${p.nama}*,\n\nTerima kasih sudah mendaftar sambungan baru dengan Aetra Air Tangerang dengan Nomor Form: *${p.id}*.\n\nStatus pendaftaran Anda saat ini:\n*${p.status}*\n\nPantau progres lengkapnya secara real-time di sini:\n${linkPintar}\n\nUntuk informasi lebih lanjut bisa hubungi CS AETRA\n\nTerima kasih,\nAetra Air Tangerang`;
+        window.open(`https://wa.me/${noHP}?text=${encodeURIComponent(pesanTeks)}`, '_blank');
+    }
+
+    fetchDatabase();
+</script>
+</body>
+</html>

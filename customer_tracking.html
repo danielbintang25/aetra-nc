@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Pemasangan Aetra</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
+        .mobile-container { max-width: 480px; margin: 40px auto; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; min-height: 80vh; }
+        .header-app { background-color: #0056b3; padding: 20px; color: white; text-align: center; }
+        .step { position: relative; padding-left: 40px; margin-bottom: 25px; }
+        .step::before { content: ''; position: absolute; left: 14px; top: 25px; bottom: -25px; width: 2px; background-color: #e9ecef; }
+        .step:last-child::before { display: none; }
+        .step-icon { position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; transition: 0.3s; z-index: 2;}
+        .icon-done { background-color: #198754; color: white; } 
+        .icon-active { background-color: #0d6efd; color: white; box-shadow: 0 0 0 4px rgba(13,110,253,0.2); } 
+        .icon-pending { background-color: #e9ecef; color: #6c757d; } 
+        .text-active { color: #0d6efd; font-weight: bold; }
+        .text-pending { color: #adb5bd; }
+        .hide { display: none !important; }
+        .tgl-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-top: 4px; font-weight: 500;}
+        .loading-text { text-align: center; margin-top: 50px; font-weight: bold; color: #0056b3; }
+        .btn-cs { background-color: #25D366; color: white; border: none; transition: 0.3s; }
+        .btn-cs:hover { background-color: #1DA851; color: white;}
+        .sub-step-box { border-left: 2px solid #0d6efd; padding-left: 15px; margin-left: -20px; margin-top: 15px;}
+        .sub-item { margin-bottom: 12px; }
+        .sub-title { font-size: 13px; font-weight: 700; color: #495057;}
+        .sub-desc { font-size: 12px; color: #6c757d; margin-top: 2px; line-height: 1.4;}
+        .sla-badge { background-color: #fff3cd; color: #856404; font-size: 11px; padding: 6px 10px; border-radius: 6px; border: 1px solid #ffeeba; display: block; width: fit-content; margin-top: 8px; font-weight: 500; line-height: 1.5;}
+    </style>
+</head>
+<body>
+
+<div id="loading-screen" class="mobile-container p-5"><h5 class="loading-text">🔄 Mengambil data terbaru...</h5></div>
+<div id="error-screen" class="mobile-container p-5 text-center hide"><h4 class="text-danger mt-5">Data Tidak Ditemukan</h4><p>Link pelacakan tidak valid atau data pendaftaran telah dihapus.</p></div>
+
+<div id="app-screen" class="mobile-container hide">
+    <div class="header-app"><h5 class="mb-0">Aetra Live Tracking</h5><small id="display-info">No. Form: Memuat... | Memuat...</small></div>
+    <div class="p-4">
+        <h6 class="fw-bold mb-4 text-center">Riwayat & Status Pemasangan</h6>
+        
+        <div class="step" id="step-1"><div class="step-icon">1</div><h6 class="mb-1">Pendaftaran Diterima</h6><span id="tgl-1" class="tgl-badge hide"></span></div>
+        
+        <div class="step" id="step-2">
+            <div class="step-icon">2</div><h6 class="mb-1">Pembayaran Diterima</h6>
+            <span id="tgl-2" class="tgl-badge hide" style="display:block; width:fit-content;"></span>
+            
+            <div id="sla-badge" class="sla-badge hide">
+                ⏱️ <strong>Estimasi dilakukan pemasangan: <span id="sla-tgl-max"></span></strong><br/>
+                <span class="text-muted">(Maks. 14 Hari Kerja - <span id="sla-text"></span>)</span>
+            </div>
+        </div>
+        
+        <div class="step" id="step-3">
+            <div class="step-icon">3</div><h6 class="mb-1">Proses Pemasangan</h6>
+            <span id="tgl-3" class="tgl-badge hide" style="display:block; width:fit-content;"></span>
+
+            <div id="sub-step-container" class="sub-step-box hide">
+                <div id="sub-1" class="sub-item hide">
+                    <div class="sub-title">✔️ Permohonan pemasangan diproses</div>
+                    <div class="sub-desc">Tim kami sedang menyiapkan penugasan pemasangan untuk lokasi Anda.</div>
+                </div>
+                <div id="sub-2" class="sub-item hide">
+                    <div class="sub-title text-primary" id="title-sub2">✔️ Jadwal terkonfirmasi</div>
+                    <div class="sub-desc">Tanggal Pemasangan: <strong id="text-jadwal" class="text-dark"></strong></div>
+                </div>
+                <div id="sub-3" class="sub-item hide">
+                    <div class="sub-title" id="title-kendala">⚠️ Pemasangan di lokasi</div>
+                    <div class="sub-desc" id="text-kendala"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" id="step-4"><div class="step-icon">4</div><h6 class="mb-1">Selesai / Air Mengalir</h6><span id="tgl-4" class="tgl-badge hide"></span></div>
+
+        <div class="mt-5 text-center border-top pt-4">
+            <p class="small text-muted mb-2">Butuh bantuan atau informasi lebih lanjut?</p>
+            <a href="https://wa.me/6281260848173" class="btn btn-cs w-100 fw-bold shadow-sm" target="_blank">💬 Hubungi CS Aetra</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===================================================================
+    const SUPABASE_URL = 'https://vyngziqwsdhetapjzlgr.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5bmd6aXF3c2RoZXRhcGp6bGdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4ODE0ODIsImV4cCI6MjEwMjQ1NzQ4Mn0._uJcP6YPkXH6mQmIHW-vrKOZIguHGKI_72zEWYei24s';
+    // ===================================================================
+
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const urlParams = new URLSearchParams(window.location.search);
+    const customerId = urlParams.get('id');
+
+    function formatTanggal(tglStr) {
+        if(!tglStr) return "";
+        const bln = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Ags","Sep","Okt","Nov","Des"];
+        let d = new Date(tglStr);
+        return `${d.getDate()} ${bln[d.getMonth()]} ${d.getFullYear()}`;
+    }
+
+    function hitungHariKerja(startDateTs) {
+        let start = new Date(startDateTs); let today = new Date(); let count = 0;
+        let cur = new Date(start); cur.setHours(0,0,0,0); today.setHours(0,0,0,0);
+        while(cur <= today) {
+            let day = cur.getDay();
+            if(day !== 0 && day !== 6) count++; 
+            cur.setDate(cur.getDate() + 1);
+        }
+        return count > 0 ? count : 1; 
+    }
+
+    async function loadDataLive() {
+        if (!customerId) { document.getElementById('loading-screen').classList.add('hide'); document.getElementById('error-screen').classList.remove('hide'); return; }
+        const { data, error } = await _supabase.from('pelanggan').select('*').eq('id', customerId);
+        document.getElementById('loading-screen').classList.add('hide');
+
+        if (error || data.length === 0) {
+            document.getElementById('error-screen').classList.remove('hide');
+        } else {
+            let customerData = data[0];
+            document.getElementById('app-screen').classList.remove('hide');
+            document.getElementById('display-info').innerText = `No. Form: ${customerData.id} | ${customerData.nama}`;
+
+            const statusMap = { "Pendaftaran Diterima": 1, "Pembayaran Diterima": 2, "Proses Pemasangan": 3, "Selesai": 4 };
+            const currentStep = statusMap[customerData.status];
+            let riwayat = customerData.riwayat_tgl;
+
+            // LOGIKA MENYEMBUNYIKAN SLA JIKA JADWAL TERTUNDA MELEWATI 14 HARI
+            let maxSlaDateStr = "";
+            let isPendingSLA = false;
+            
+            if (riwayat.tgl_bayar_ts) {
+                let start = new Date(riwayat.tgl_bayar_ts);
+                let added = 0;
+                while(added < 14) {
+                    start.setDate(start.getDate() + 1);
+                    if(start.getDay() !== 0 && start.getDay() !== 6) added++;
+                }
+                maxSlaDateStr = formatTanggal(start.toISOString().split('T')[0]);
+                
+                start.setHours(23, 59, 59, 999);
+                if (riwayat.detail_pemasangan && riwayat.detail_pemasangan.jadwal) {
+                    let jadwalDate = new Date(riwayat.detail_pemasangan.jadwal);
+                    if (jadwalDate > start) isPendingSLA = true;
+                }
+            }
+
+            for (let i = 1; i <= 4; i++) {
+                let stepDiv = document.getElementById(`step-${i}`);
+                let iconDiv = stepDiv.querySelector('.step-icon');
+                let textTitle = stepDiv.querySelector('h6');
+                let tglBadge = document.getElementById(`tgl-${i}`);
+
+                tglBadge.classList.add('hide');
+
+                if (i < currentStep) {
+                    // Tahapan yang sudah dilewati -> Hijau
+                    iconDiv.className = 'step-icon icon-done'; iconDiv.innerText = '✓';
+                    if(riwayat && riwayat[i] !== "") {
+                        tglBadge.innerText = `Selesai: ${riwayat[i].split(',')[0]}`; tglBadge.classList.remove('hide'); tglBadge.style.backgroundColor = '#e9ecef'; tglBadge.style.color = '#495057';
+                    }
+                } else if (i === currentStep) {
+                    // Tahapan saat ini
+                    if (currentStep === 4) {
+                        // JIKA STATUS SELESAI -> LANGSUNG CENTANG HIJAU
+                        iconDiv.className = 'step-icon icon-done'; iconDiv.innerText = '✓';
+                    } else {
+                        // LAINNYA -> BIRU AKTIF
+                        iconDiv.className = 'step-icon icon-active'; textTitle.classList.add('text-active');
+                    }
+                    
+                    if(riwayat && riwayat[i] !== "") {
+                        tglBadge.innerText = `Diperbarui: ${riwayat[i].split(',')[0]}`; tglBadge.classList.remove('hide'); tglBadge.style.backgroundColor = '#cfe2ff'; tglBadge.style.color = '#0a58ca';
+                    }
+                } else {
+                    iconDiv.className = 'step-icon icon-pending'; textTitle.classList.add('text-pending');
+                }
+
+                // TAMPILKAN SLA DENGAN SYARAT (Tidak muncul jika isPendingSLA)
+                if (i === 2 && (currentStep === 2 || currentStep === 3) && riwayat.tgl_bayar_ts && !isPendingSLA) {
+                    let hariKe = hitungHariKerja(riwayat.tgl_bayar_ts);
+                    document.getElementById('sla-tgl-max').innerText = maxSlaDateStr;
+                    document.getElementById('sla-text').innerText = `Hari ke-${hariKe}`;
+                    document.getElementById('sla-badge').classList.remove('hide');
+                }
+
+                // PANEL SUB-PEMASANGAN
+                if (i === 3 && (currentStep === 3 || currentStep === 4)) {
+                    if (riwayat.detail_pemasangan) {
+                        let det = riwayat.detail_pemasangan;
+                        document.getElementById('sub-step-container').classList.remove('hide');
+                        
+                        if (det.tgl_so) document.getElementById('sub-1').classList.remove('hide');
+                        if (det.jadwal) { 
+                            document.getElementById('sub-2').classList.remove('hide'); 
+                            document.getElementById('text-jadwal').innerText = formatTanggal(det.jadwal); 
+                        }
+                        
+                        if (det.kondisi) {
+                            document.getElementById('title-sub2').classList.remove('text-primary');
+                            document.getElementById('sub-3').classList.remove('hide');
+                            let t3 = document.getElementById('title-kendala');
+                            let txt3 = document.getElementById('text-kendala');
+                            
+                            if (det.kondisi === "Sukses") {
+                                t3.innerHTML = `✅ Pemasangan di lokasi`;
+                                txt3.innerHTML = `<span class="text-success fw-bold">[Sukses]</span> Pemasangan telah selesai dilakukan.`;
+                                let s3Icon = document.querySelector('#step-3 .step-icon');
+                                s3Icon.className = 'step-icon icon-done'; s3Icon.innerText = '✓';
+
+                            } else if (det.kondisi === "Gagal") {
+                                t3.innerHTML = `❌ Pemasangan di lokasi`;
+                                txt3.innerHTML = `<span class="text-danger fw-bold">[Gagal]</span> ${det.kategori}.<br/><i>Catatan: ${det.catatan}</i>`;
+                                
+                                // TIMPA WARNA HIJAU/BIRU DI TAHAP 4 MENJADI MERAH TOTAL
+                                let s4Title = document.querySelector('#step-4 h6');
+                                s4Title.innerHTML = `<span class="text-danger fw-bold">❌ Gagal Melakukan Pemasangan</span>`;
+                                let s4Icon = document.querySelector('#step-4 .step-icon');
+                                s4Icon.className = 'step-icon bg-danger text-white border-danger';
+                                s4Icon.innerText = 'X';
+
+                            } else {
+                                let tambahan = det.tgl_kembali ? `<br/><span class="text-info fw-bold">📅 Dijadwalkan Ulang: ${formatTanggal(det.tgl_kembali)}</span>` : "";
+                                t3.innerHTML = `⚠️ Pemasangan di lokasi`;
+                                txt3.innerHTML = `<span class="text-warning fw-bold" style="color:#d39e00 !important;">[Tertunda]</span> ${det.kategori}.<br/><i>Catatan: ${det.catatan}</i>${tambahan}`;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    loadDataLive();
+</script>
+</body>
+</html>
