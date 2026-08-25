@@ -10,6 +10,8 @@
         .hide { display: none !important; }
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255,255,255,0.8); z-index: 9998; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: #0056b3;}
         .badge-sla { font-size: 12px; padding: 5px 8px; }
+        /* Style agar filter terlihat menyatu dengan tabel */
+        .table-toolbar { background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -32,26 +34,33 @@
 </nav>
 
 <div class="container-fluid mt-4 px-4">
+    <!-- KPI DIRUBAH MENJADI 4 KOLOM -->
     <div class="row mb-4">
-        <div class="col-md-4"><div class="card text-white bg-primary shadow-sm"><div class="card-body"><h6 class="card-title">Total Pendaftaran (Filter)</h6><h2 id="kpi-total">0</h2></div></div></div>
-        <div class="col-md-4"><div class="card text-white bg-warning text-dark shadow-sm"><div class="card-body"><h6 class="card-title">Pembayaran Diterima</h6><h2 id="kpi-bayar">0</h2></div></div></div>
-        <div class="col-md-4"><div class="card text-white bg-success shadow-sm"><div class="card-body"><h6 class="card-title">Pemasangan Selesai</h6><h2 id="kpi-selesai">0</h2></div></div></div>
+        <div class="col-md-3"><div class="card text-white bg-primary shadow-sm"><div class="card-body"><h6 class="card-title">Total Pendaftaran (Filter)</h6><h3 id="kpi-total">0</h3></div></div></div>
+        <div class="col-md-3"><div class="card text-white bg-warning text-dark shadow-sm"><div class="card-body"><h6 class="card-title">Pembayaran Diterima</h6><h3 id="kpi-bayar">0</h3></div></div></div>
+        <div class="col-md-3"><div class="card text-dark bg-info shadow-sm"><div class="card-body"><h6 class="card-title">Proses Pemasangan</h6><h3 id="kpi-proses">0</h3></div></div></div>
+        <div class="col-md-3"><div class="card text-white bg-success shadow-sm"><div class="card-body"><h6 class="card-title">Pemasangan Selesai</h6><h3 id="kpi-selesai">0</h3></div></div></div>
     </div>
 
-    <div class="row mb-3 bg-white p-3 shadow-sm rounded align-items-end">
-        <div class="col-md-2 mb-2 mb-md-0"><label class="form-label small fw-bold text-muted">Status:</label><select id="filterStatus" class="form-select border-primary" onchange="renderTabel()"><option value="Semua">Semua Status</option><option value="Pendaftaran Diterima">Pendaftaran Diterima</option><option value="Pembayaran Diterima">Pembayaran Diterima</option><option value="Proses Pemasangan">Proses Pemasangan</option><option value="Selesai">Selesai</option></select></div>
-        <div class="col-md-2 mb-2 mb-md-0"><label class="form-label small fw-bold text-muted">Bulan Masuk:</label><select id="filterBulan" class="form-select border-primary" onchange="renderTabel()"><option value="Semua">Semua Bulan</option><option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option><option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option></select></div>
-        <div class="col-md-2 mb-2 mb-md-0"><label class="form-label small fw-bold text-muted">Tahun Masuk:</label><select id="filterTahun" class="form-select border-primary" onchange="renderTabel()"><option value="Semua">Semua Tahun</option><option value="2026">2026</option><option value="2027">2027</option></select></div>
-        <div class="col-md-2 mb-2 mb-md-0"><label class="form-label small fw-bold text-muted">Urutkan Data:</label><select id="sortTanggal" class="form-select border-primary" onchange="renderTabel()"><option value="baru">Paling Baru ke Lama</option><option value="lama">Paling Lama ke Baru</option></select></div>
-        <div class="col-md-2 mb-2 mb-md-0"><label class="form-label small fw-bold text-muted">Cari No. Form / Nama:</label><input type="text" id="searchInput" class="form-control border-primary" placeholder="Ketik pencarian..." onkeyup="renderTabel()"></div>
-        <div class="col-md-2 text-md-end"><button class="btn btn-primary fw-bold w-100" onclick="bukaModalTambah()">+ Tambah Data</button></div>
-    </div>
-    
-    <div class="card shadow-sm mb-5">
-        <div class="card-body overflow-auto">
-            <table class="table table-hover align-middle" style="font-size: 14px;">
+    <!-- TABEL & FILTER MENYATU -->
+    <div class="card shadow-sm mb-5 border-0">
+        <!-- FILTER DI DALAM HEADER TABEL -->
+        <div class="card-header table-toolbar p-3">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-2"><label class="form-label small fw-bold text-muted mb-1">Status:</label><select id="filterStatus" class="form-select form-select-sm border-secondary" onchange="renderTabel()"><option value="Semua">Semua Status</option><option value="Pendaftaran Diterima">Pendaftaran Diterima</option><option value="Pembayaran Diterima">Pembayaran Diterima</option><option value="Proses Pemasangan">Proses Pemasangan</option><option value="Selesai">Selesai</option></select></div>
+                <div class="col-md-2"><label class="form-label small fw-bold text-muted mb-1">Bulan Masuk:</label><select id="filterBulan" class="form-select form-select-sm border-secondary" onchange="renderTabel()"><option value="Semua">Semua Bulan</option><option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option><option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option></select></div>
+                <div class="col-md-2"><label class="form-label small fw-bold text-muted mb-1">Tahun Masuk:</label><select id="filterTahun" class="form-select form-select-sm border-secondary" onchange="renderTabel()"><option value="Semua">Semua Tahun</option><option value="2026">2026</option><option value="2027">2027</option></select></div>
+                <div class="col-md-2"><label class="form-label small fw-bold text-muted mb-1">Urutkan Data:</label><select id="sortTanggal" class="form-select form-select-sm border-secondary" onchange="renderTabel()"><option value="baru">Paling Baru ke Lama</option><option value="lama">Paling Lama ke Baru</option></select></div>
+                <div class="col-md-2"><label class="form-label small fw-bold text-muted mb-1">Cari No. Form/Nama:</label><input type="text" id="searchInput" class="form-control form-control-sm border-secondary" placeholder="Ketik pencarian..." onkeyup="renderTabel()"></div>
+                <div class="col-md-2 text-md-end"><button class="btn btn-primary btn-sm fw-bold w-100 h-100" onclick="bukaModalTambah()">+ Tambah Data</button></div>
+            </div>
+        </div>
+        
+        <!-- ISI TABEL -->
+        <div class="card-body p-0 overflow-auto">
+            <table class="table table-hover align-middle mb-0" style="font-size: 14px;">
                 <thead class="table-primary">
-                    <tr><th>No.</th><th>No. Form</th><th>Tgl Masuk</th><th>Tgl Bayar</th><th>Tgl Pasang</th><th>SLA Pasang</th><th>Nama</th><th>No. HP</th><th style="min-width: 170px;">Status</th><th class="text-center" style="min-width: 220px;">Aksi</th></tr>
+                    <tr><th class="ps-3">No.</th><th>No. Form</th><th>Tgl Masuk</th><th>Tgl Bayar</th><th>Tgl Pasang</th><th>SLA Pasang</th><th>Nama</th><th>No. HP</th><th style="min-width: 170px;">Status</th><th class="text-center pe-3" style="min-width: 220px;">Aksi</th></tr>
                 </thead>
                 <tbody id="tabel-pelanggan"></tbody>
             </table>
@@ -117,6 +126,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // ===================================================================
+    // MASUKKAN KEMBALI API KEY SUPABASE ANDA DI SINI
     // ===================================================================
     const SUPABASE_URL = 'https://vyngziqwsdhetapjzlgr.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5bmd6aXF3c2RoZXRhcGp6bGdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4ODE0ODIsImV4cCI6MjEwMjQ1NzQ4Mn0._uJcP6YPkXH6mQmIHW-vrKOZIguHGKI_72zEWYei24s';
@@ -205,6 +216,9 @@
             return passStatus && passBulan && passTahun && passSearch;
         });
 
+        // -------------------------------------------------------------
+        // UPDATE KPI (4 KOLOM)
+        // -------------------------------------------------------------
         let selesaiData = dataTampil.filter(p => p.status === "Selesai");
         let totalSelesai = selesaiData.length;
         let totalGagal = selesaiData.filter(p => p.riwayat_tgl && p.riwayat_tgl.detail_pemasangan && p.riwayat_tgl.detail_pemasangan.kondisi === "Gagal").length;
@@ -212,7 +226,8 @@
 
         document.getElementById("kpi-total").innerText = dataTampil.length;
         document.getElementById("kpi-bayar").innerText = dataTampil.filter(p => p.status === "Pembayaran Diterima").length;
-        document.getElementById("kpi-selesai").innerHTML = `${totalSelesai} <br><small class="fs-6 fw-normal d-block mt-1">(Sukses: ${totalSukses} | Gagal: ${totalGagal})</small>`;
+        document.getElementById("kpi-proses").innerText = dataTampil.filter(p => p.status === "Proses Pemasangan").length; // KPI BARU
+        document.getElementById("kpi-selesai").innerHTML = `${totalSelesai} <br><small class="fs-7 fw-normal d-block mt-1">(Sukses: ${totalSukses} | Gagal: ${totalGagal})</small>`;
 
         dataTampil.sort((a, b) => fSort === "baru" ? (b.tgl_buat - a.tgl_buat) : (a.tgl_buat - b.tgl_buat));
 
@@ -222,8 +237,6 @@
             if(row.status === "Pembayaran Diterima") statusColor = "bg-primary";
             if(row.status === "Pendaftaran Diterima") statusColor = "bg-info text-dark";
             if(row.status === "Selesai") statusColor = "bg-success";
-
-            const statusMap = { "Pendaftaran Diterima": 1, "Pembayaran Diterima": 2, "Proses Pemasangan": 3, "Selesai": 4 };
             
             let tglMasuk = row.riwayat_tgl && row.riwayat_tgl["1"] ? row.riwayat_tgl["1"].split(',')[0] : "-";
             let tglBayar = row.riwayat_tgl && row.riwayat_tgl["2"] ? row.riwayat_tgl["2"].split(',')[0] : "-";
@@ -232,7 +245,8 @@
             let slaHtml = "-";
             if ((row.status === "Pembayaran Diterima" || row.status === "Proses Pemasangan") && row.riwayat_tgl && row.riwayat_tgl.tgl_bayar_ts) {
                 let pendingStatus = false;
-                if (row.riwayat_tgl.detail_pemasangan && row.riwayat_tgl.detail_pemasangan.jadwal) {
+                // Hanya hitung pending jika status di Proses Pemasangan dan jadwal ada
+                if (row.status === "Proses Pemasangan" && row.riwayat_tgl.detail_pemasangan && row.riwayat_tgl.detail_pemasangan.jadwal) {
                     pendingStatus = isSlaPending(row.riwayat_tgl.tgl_bayar_ts, row.riwayat_tgl.detail_pemasangan.jadwal);
                 }
 
@@ -247,16 +261,23 @@
                 slaHtml = `<span class="badge bg-success badge-sla">Tuntas</span>`; 
             }
 
-            // PERBAIKAN LINK AGAR MENDETEKSI FOLDER GITHUB OTOMATIS
-            let currentUrl = window.location.href.split('?')[0].replace('index.html', '');
-            if (!currentUrl.endsWith('/')) currentUrl += '/';
-            const linkTracker = `${currentUrl}customer_tracking.html?id=${row.id}`;
+            // =========================================================================
+            // SOLUSI URL LINK ANTI-ERROR KHUSUS GITHUB (Bisa deteksi sub-folder)
+            // =========================================================================
+            let basePath = window.location.href.split('?')[0];
+            if (basePath.endsWith('index.html')) {
+                basePath = basePath.substring(0, basePath.lastIndexOf('/') + 1);
+            } else if (!basePath.endsWith('/')) {
+                basePath += '/';
+            }
+            const linkTracker = basePath + 'customer_tracking.html?id=' + row.id;
+            // =========================================================================
 
             let btnDetailPasang = (row.status === "Proses Pemasangan") ? `<button class="btn btn-sm btn-info w-100 fw-bold mt-1" onclick="bukaModalPemasangan('${row.id}')">⚙️ Detail Pasang</button>` : '';
 
             const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td class="fw-bold">${nomorUrut++}</td><td class="fw-bold text-primary">${row.id}</td>
+                <td class="fw-bold ps-3">${nomorUrut++}</td><td class="fw-bold text-primary">${row.id}</td>
                 <td class="small fw-bold text-muted">${tglMasuk}</td>
                 <td class="small fw-bold text-success">${tglBayar}</td>
                 <td class="small fw-bold" style="color: #0056b3;">${tglPasang}</td>
@@ -271,7 +292,7 @@
                     </select>
                     ${btnDetailPasang}
                 </td>
-                <td class="text-center">
+                <td class="text-center pe-3">
                     <div class="btn-group w-100 mb-1"><button class="btn btn-sm btn-warning" onclick="bukaModalEdit('${row.id}')">Edit</button><button class="btn btn-sm btn-danger" onclick="hapusPelanggan('${row.id}')">Hapus</button><a href="${linkTracker}" target="_blank" class="btn btn-sm btn-outline-primary">Buka Link</a></div>
                     <button class="btn btn-sm btn-success w-100 fw-bold" onclick="kirimWA('${row.id}', '${linkTracker}')">📲 WA</button>
                 </td>
@@ -308,11 +329,22 @@
         riwayatBaru[stepAktif.toString()] = getTanggalSekarang();
         for (let i = stepAktif + 1; i <= 4; i++) { riwayatBaru[i.toString()] = ""; }
 
+        // =======================================================
+        // LOGIKA RESET: Jika Status Diundur (Mundur Tahapan)
+        // =======================================================
+        if (stepAktif < 3) { 
+            // Jika diundur ke Pembayaran / Pendaftaran, hapus jadwal pasang
+            delete riwayatBaru.detail_pemasangan; 
+        }
+        if (stepAktif < 2) { 
+            // Jika diundur sampai Pendaftaran, hapus tanggal bayar
+            delete riwayatBaru["tgl_bayar_ts"]; 
+        }
+        // =======================================================
+
         if ((statusBaru === "Pembayaran Diterima" || statusBaru === "Proses Pemasangan") && !riwayatBaru["tgl_bayar_ts"]) {
             riwayatBaru["tgl_bayar_ts"] = Date.now();
         }
-        
-        if (stepAktif < 2) { delete riwayatBaru["tgl_bayar_ts"]; }
 
         await _supabase.from('pelanggan').update({ status: statusBaru, riwayat_tgl: riwayatBaru }).eq('id', id);
         fetchDatabase();
