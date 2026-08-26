@@ -10,7 +10,6 @@
         .hide { display: none !important; }
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255,255,255,0.8); z-index: 9998; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: #0056b3;}
         .badge-sla { font-size: 12px; padding: 5px 8px; }
-        /* Style agar filter terlihat menyatu dengan tabel */
         .table-toolbar { background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -34,17 +33,26 @@
 </nav>
 
 <div class="container-fluid mt-4 px-4">
-    <!-- KPI DIRUBAH MENJADI 4 KOLOM -->
+    <!-- KPI 4 KOLOM DENGAN DESAIN SUKSES/GAGAL TERPISAH -->
     <div class="row mb-4">
         <div class="col-md-3"><div class="card text-white bg-primary shadow-sm"><div class="card-body"><h6 class="card-title">Total Pendaftaran (Filter)</h6><h3 id="kpi-total">0</h3></div></div></div>
         <div class="col-md-3"><div class="card text-white bg-warning text-dark shadow-sm"><div class="card-body"><h6 class="card-title">Pembayaran Diterima</h6><h3 id="kpi-bayar">0</h3></div></div></div>
         <div class="col-md-3"><div class="card text-dark bg-info shadow-sm"><div class="card-body"><h6 class="card-title">Proses Pemasangan</h6><h3 id="kpi-proses">0</h3></div></div></div>
-        <div class="col-md-3"><div class="card text-white bg-success shadow-sm"><div class="card-body"><h6 class="card-title">Pemasangan Selesai</h6><h3 id="kpi-selesai">0</h3></div></div></div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success shadow-sm">
+                <div class="card-body pb-2">
+                    <h6 class="card-title mb-1">Pemasangan Selesai</h6>
+                    <h3 id="kpi-selesai" class="mb-2">0</h3>
+                    <div class="d-flex justify-content-between border-top border-light pt-1">
+                        <small>✅ Sukses: <b id="kpi-sukses">0</b></small>
+                        <small>❌ Gagal: <b id="kpi-gagal">0</b></small>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- TABEL & FILTER MENYATU -->
     <div class="card shadow-sm mb-5 border-0">
-        <!-- FILTER DI DALAM HEADER TABEL -->
         <div class="card-header table-toolbar p-3">
             <div class="row g-2 align-items-end">
                 <div class="col-md-2"><label class="form-label small fw-bold text-muted mb-1">Status:</label><select id="filterStatus" class="form-select form-select-sm border-secondary" onchange="renderTabel()"><option value="Semua">Semua Status</option><option value="Pendaftaran Diterima">Pendaftaran Diterima</option><option value="Pembayaran Diterima">Pembayaran Diterima</option><option value="Proses Pemasangan">Proses Pemasangan</option><option value="Selesai">Selesai</option></select></div>
@@ -56,7 +64,6 @@
             </div>
         </div>
         
-        <!-- ISI TABEL -->
         <div class="card-body p-0 overflow-auto">
             <table class="table table-hover align-middle mb-0" style="font-size: 14px;">
                 <thead class="table-primary">
@@ -126,8 +133,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // ===================================================================
-    // MASUKKAN KEMBALI API KEY SUPABASE ANDA DI SINI
     // ===================================================================
     const SUPABASE_URL = 'https://vyngziqwsdhetapjzlgr.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5bmd6aXF3c2RoZXRhcGp6bGdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4ODE0ODIsImV4cCI6MjEwMjQ1NzQ4Mn0._uJcP6YPkXH6mQmIHW-vrKOZIguHGKI_72zEWYei24s';
@@ -216,9 +221,7 @@
             return passStatus && passBulan && passTahun && passSearch;
         });
 
-        // -------------------------------------------------------------
-        // UPDATE KPI (4 KOLOM)
-        // -------------------------------------------------------------
+        // UPDATE KPI DESAIN BARU
         let selesaiData = dataTampil.filter(p => p.status === "Selesai");
         let totalSelesai = selesaiData.length;
         let totalGagal = selesaiData.filter(p => p.riwayat_tgl && p.riwayat_tgl.detail_pemasangan && p.riwayat_tgl.detail_pemasangan.kondisi === "Gagal").length;
@@ -226,8 +229,10 @@
 
         document.getElementById("kpi-total").innerText = dataTampil.length;
         document.getElementById("kpi-bayar").innerText = dataTampil.filter(p => p.status === "Pembayaran Diterima").length;
-        document.getElementById("kpi-proses").innerText = dataTampil.filter(p => p.status === "Proses Pemasangan").length; // KPI BARU
-        document.getElementById("kpi-selesai").innerHTML = `${totalSelesai} <br><small class="fs-7 fw-normal d-block mt-1">(Sukses: ${totalSukses} | Gagal: ${totalGagal})</small>`;
+        document.getElementById("kpi-proses").innerText = dataTampil.filter(p => p.status === "Proses Pemasangan").length; 
+        document.getElementById("kpi-selesai").innerText = totalSelesai;
+        document.getElementById("kpi-sukses").innerText = totalSukses;
+        document.getElementById("kpi-gagal").innerText = totalGagal;
 
         dataTampil.sort((a, b) => fSort === "baru" ? (b.tgl_buat - a.tgl_buat) : (a.tgl_buat - b.tgl_buat));
 
@@ -240,12 +245,29 @@
             
             let tglMasuk = row.riwayat_tgl && row.riwayat_tgl["1"] ? row.riwayat_tgl["1"].split(',')[0] : "-";
             let tglBayar = row.riwayat_tgl && row.riwayat_tgl["2"] ? row.riwayat_tgl["2"].split(',')[0] : "-";
-            let tglPasang = (row.riwayat_tgl && row.riwayat_tgl.detail_pemasangan && row.riwayat_tgl.detail_pemasangan.jadwal) ? formatTanggal(row.riwayat_tgl.detail_pemasangan.jadwal) : "-";
             
+            // LOGIKA MENAMPILKAN ESTIMASI DI TABEL DASHBOARD
+            let maxSlaDateStr = "-";
+            if (row.riwayat_tgl && row.riwayat_tgl.tgl_bayar_ts) {
+                let start = new Date(row.riwayat_tgl.tgl_bayar_ts);
+                let added = 0;
+                while(added < 14) {
+                    start.setDate(start.getDate() + 1);
+                    if(start.getDay() !== 0 && start.getDay() !== 6) added++;
+                }
+                maxSlaDateStr = formatTanggal(start.toISOString().split('T')[0]);
+            }
+
+            let tglPasang = "-";
+            if (row.riwayat_tgl && row.riwayat_tgl.detail_pemasangan && row.riwayat_tgl.detail_pemasangan.jadwal) {
+                tglPasang = `<span class="fw-bold" style="color: #0056b3;">${formatTanggal(row.riwayat_tgl.detail_pemasangan.jadwal)}</span>`;
+            } else if (maxSlaDateStr !== "-") {
+                tglPasang = `<span class="text-secondary small"><i>Batas: ${maxSlaDateStr}</i></span>`;
+            }
+
             let slaHtml = "-";
             if ((row.status === "Pembayaran Diterima" || row.status === "Proses Pemasangan") && row.riwayat_tgl && row.riwayat_tgl.tgl_bayar_ts) {
                 let pendingStatus = false;
-                // Hanya hitung pending jika status di Proses Pemasangan dan jadwal ada
                 if (row.status === "Proses Pemasangan" && row.riwayat_tgl.detail_pemasangan && row.riwayat_tgl.detail_pemasangan.jadwal) {
                     pendingStatus = isSlaPending(row.riwayat_tgl.tgl_bayar_ts, row.riwayat_tgl.detail_pemasangan.jadwal);
                 }
@@ -261,9 +283,7 @@
                 slaHtml = `<span class="badge bg-success badge-sla">Tuntas</span>`; 
             }
 
-            // =========================================================================
-            // SOLUSI URL LINK ANTI-ERROR KHUSUS GITHUB (Bisa deteksi sub-folder)
-            // =========================================================================
+            // URL LINK KHUSUS GITHUB PENGGUNAAN ROOT
             let basePath = window.location.href.split('?')[0];
             if (basePath.endsWith('index.html')) {
                 basePath = basePath.substring(0, basePath.lastIndexOf('/') + 1);
@@ -271,7 +291,6 @@
                 basePath += '/';
             }
             const linkTracker = basePath + 'customer_tracking.html?id=' + row.id;
-            // =========================================================================
 
             let btnDetailPasang = (row.status === "Proses Pemasangan") ? `<button class="btn btn-sm btn-info w-100 fw-bold mt-1" onclick="bukaModalPemasangan('${row.id}')">⚙️ Detail Pasang</button>` : '';
 
@@ -280,7 +299,7 @@
                 <td class="fw-bold ps-3">${nomorUrut++}</td><td class="fw-bold text-primary">${row.id}</td>
                 <td class="small fw-bold text-muted">${tglMasuk}</td>
                 <td class="small fw-bold text-success">${tglBayar}</td>
-                <td class="small fw-bold" style="color: #0056b3;">${tglPasang}</td>
+                <td class="small">${tglPasang}</td>
                 <td class="text-center">${slaHtml}</td>
                 <td class="fw-bold">${row.nama}</td><td class="small">${row.telepon}</td>
                 <td>
@@ -329,18 +348,8 @@
         riwayatBaru[stepAktif.toString()] = getTanggalSekarang();
         for (let i = stepAktif + 1; i <= 4; i++) { riwayatBaru[i.toString()] = ""; }
 
-        // =======================================================
-        // LOGIKA RESET: Jika Status Diundur (Mundur Tahapan)
-        // =======================================================
-        if (stepAktif < 3) { 
-            // Jika diundur ke Pembayaran / Pendaftaran, hapus jadwal pasang
-            delete riwayatBaru.detail_pemasangan; 
-        }
-        if (stepAktif < 2) { 
-            // Jika diundur sampai Pendaftaran, hapus tanggal bayar
-            delete riwayatBaru["tgl_bayar_ts"]; 
-        }
-        // =======================================================
+        if (stepAktif < 3) { delete riwayatBaru.detail_pemasangan; }
+        if (stepAktif < 2) { delete riwayatBaru["tgl_bayar_ts"]; }
 
         if ((statusBaru === "Pembayaran Diterima" || statusBaru === "Proses Pemasangan") && !riwayatBaru["tgl_bayar_ts"]) {
             riwayatBaru["tgl_bayar_ts"] = Date.now();
