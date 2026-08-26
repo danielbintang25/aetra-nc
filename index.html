@@ -67,8 +67,9 @@
             <h4 class="fw-bold" style="color: #0f172a;">Aetra Connect</h4>
             <p class="text-muted small">Admin Workspace Panel</p>
         </div>
-        <input type="text" id="username" class="form-control mb-3" placeholder="Username (admin)">
-        <input type="password" id="password" class="form-control mb-3" placeholder="Password (admin123)" onkeypress="if(event.key === 'Enter') cekLogin()">
+        <!-- INPUT DIUBAH MENJADI EMAIL -->
+        <input type="email" id="email" class="form-control mb-3" placeholder="Alamat Email Admin">
+        <input type="password" id="password" class="form-control mb-3" placeholder="Password Sistem" onkeypress="if(event.key === 'Enter') cekLogin()">
         <button class="btn btn-primary w-100 fw-bold py-2" onclick="cekLogin()">Masuk Dashboard</button>
         <p id="error-login" class="text-danger text-center mt-3 mb-0 small hide fw-medium">Gagal Login! Periksa kredensial Anda.</p>
     </div>
@@ -82,49 +83,19 @@
 </nav>
 
 <div class="container-fluid main-container">
-    <!-- KPI CARDS MODERN -->
     <div class="row g-4 mb-4">
+        <div class="col-md-3"><div class="kpi-card"><div class="d-flex justify-content-between align-items-start"><div><p class="kpi-title">Total Pendaftaran</p><h3 class="kpi-val" id="kpi-total">0</h3></div><div class="kpi-icon" style="background:#eff6ff; color:#3b82f6;">📝</div></div></div></div>
+        <div class="col-md-3"><div class="kpi-card"><div class="d-flex justify-content-between align-items-start"><div><p class="kpi-title">Pembayaran Diterima</p><h3 class="kpi-val" id="kpi-bayar">0</h3></div><div class="kpi-icon" style="background:#fef3c7; color:#d97706;">💳</div></div></div></div>
+        <div class="col-md-3"><div class="kpi-card"><div class="d-flex justify-content-between align-items-start"><div><p class="kpi-title">Proses Pemasangan</p><h3 class="kpi-val" id="kpi-proses">0</h3></div><div class="kpi-icon" style="background:#e0f2fe; color:#0284c7;">⚙️</div></div></div></div>
         <div class="col-md-3">
             <div class="kpi-card">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div><p class="kpi-title">Total Pendaftaran</p><h3 class="kpi-val" id="kpi-total">0</h3></div>
-                    <div class="kpi-icon" style="background:#eff6ff; color:#3b82f6;">📝</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="kpi-card">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div><p class="kpi-title">Pembayaran Diterima</p><h3 class="kpi-val" id="kpi-bayar">0</h3></div>
-                    <div class="kpi-icon" style="background:#fef3c7; color:#d97706;">💳</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="kpi-card">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div><p class="kpi-title">Proses Pemasangan</p><h3 class="kpi-val" id="kpi-proses">0</h3></div>
-                    <div class="kpi-icon" style="background:#e0f2fe; color:#0284c7;">⚙️</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="kpi-card">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div><p class="kpi-title">Total Selesai</p><h3 class="kpi-val" id="kpi-selesai">0</h3></div>
-                    <div class="kpi-icon" style="background:#dcfce7; color:#16a34a;">✅</div>
-                </div>
-                <div class="d-flex gap-3 pt-2 mt-1 border-top" style="border-color: #f1f5f9 !important;">
-                    <div><span style="color:#16a34a; font-size:12px; font-weight:600;">✓ Sukses: </span><span class="small fw-bold text-dark" id="kpi-sukses">0</span></div>
-                    <div><span style="color:#dc2626; font-size:12px; font-weight:600;">✕ Gagal: </span><span class="small fw-bold text-dark" id="kpi-gagal">0</span></div>
-                </div>
+                <div class="d-flex justify-content-between align-items-start mb-2"><div><p class="kpi-title">Total Selesai</p><h3 class="kpi-val" id="kpi-selesai">0</h3></div><div class="kpi-icon" style="background:#dcfce7; color:#16a34a;">✅</div></div>
+                <div class="d-flex gap-3 pt-2 mt-1 border-top" style="border-color: #f1f5f9 !important;"><div><span style="color:#16a34a; font-size:12px; font-weight:600;">✓ Sukses: </span><span class="small fw-bold text-dark" id="kpi-sukses">0</span></div><div><span style="color:#dc2626; font-size:12px; font-weight:600;">✕ Gagal: </span><span class="small fw-bold text-dark" id="kpi-gagal">0</span></div></div>
             </div>
         </div>
     </div>
 
-    <!-- MAIN TABLE AREA -->
     <div class="table-container">
-        <!-- FILTER TOOLBAR -->
         <div class="table-toolbar">
             <div class="row g-3 align-items-end">
                 <div class="col-md-2"><label class="form-label small">Filter Status</label><select id="filterStatus" class="form-select form-select-sm" onchange="renderTabel()"><option value="Semua">Semua Status</option><option value="Pendaftaran Diterima">Pendaftaran Diterima</option><option value="Pembayaran Diterima">Pembayaran Diterima</option><option value="Proses Pemasangan">Proses Pemasangan</option><option value="Selesai">Selesai</option></select></div>
@@ -136,21 +107,10 @@
             </div>
         </div>
         
-        <!-- TABLE -->
         <div class="overflow-auto">
             <table class="table align-middle">
                 <thead>
-                    <tr>
-                        <th class="ps-3" style="width: 50px;">No.</th>
-                        <th>No. Form</th>
-                        <th>Tgl Masuk</th>
-                        <th>Tgl Bayar</th>
-                        <th>Tgl Pasang</th>
-                        <th>SLA Pasang</th>
-                        <th>Pelanggan</th>
-                        <th style="min-width: 170px;">Status</th>
-                        <th class="text-end pe-3" style="min-width: 220px;">Aksi</th>
-                    </tr>
+                    <tr><th class="ps-3" style="width: 50px;">No.</th><th>No. Form</th><th>Tgl Masuk</th><th>Tgl Bayar</th><th>Tgl Pasang</th><th>SLA Pasang</th><th>Pelanggan</th><th style="min-width: 170px;">Status</th><th class="text-end pe-3" style="min-width: 220px;">Aksi</th></tr>
                 </thead>
                 <tbody id="tabel-pelanggan"></tbody>
             </table>
@@ -158,7 +118,6 @@
     </div>
 </div>
 
-<!-- MODALS KETIKAN SAMA, DESAIN DIUBAH VIA CSS -->
 <div class="modal fade" id="modalForm" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -229,16 +188,48 @@
     let modalPemasanganIns = new bootstrap.Modal(document.getElementById('modalPemasangan'));
     let modeEditId = null; 
 
-    if(sessionStorage.getItem('isLoggedIn') === 'true') { document.getElementById('login-screen').classList.add('hide'); }
-    
-    function cekLogin() {
-        if(document.getElementById('username').value === 'admin' && document.getElementById('password').value === 'admin123') {
-            sessionStorage.setItem('isLoggedIn', 'true'); document.getElementById('login-screen').classList.add('hide');
-        } else { document.getElementById('error-login').classList.remove('hide'); }
+    // SISTEM LOGIN SUPABASE AUTHENTICATION
+    _supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+            document.getElementById('login-screen').classList.add('hide');
+        } else {
+            document.getElementById('login-screen').classList.remove('hide');
+            document.getElementById('loading-overlay').classList.add('hide');
+        }
+    });
+
+    async function cekLogin() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        
+        document.getElementById('error-login').classList.add('hide');
+        document.getElementById('loading-overlay').innerText = 'Memverifikasi Akses...';
+        document.getElementById('loading-overlay').classList.remove('hide');
+
+        const { data, error } = await _supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+
+        document.getElementById('loading-overlay').classList.add('hide');
+
+        if (error) {
+            document.getElementById('error-login').innerText = 'Gagal Login! Cek Email/Password Anda.';
+            document.getElementById('error-login').classList.remove('hide');
+        } else {
+            document.getElementById('login-screen').classList.add('hide');
+            fetchDatabase(); 
+        }
     }
     
-    function logout() { sessionStorage.removeItem('isLoggedIn'); window.location.reload(); }
+    async function logout() { 
+        document.getElementById('loading-overlay').innerText = 'Keluar Sistem...';
+        document.getElementById('loading-overlay').classList.remove('hide');
+        await _supabase.auth.signOut(); 
+        window.location.reload(); 
+    }
 
+    // FUNGSI SISTEM (SAMA SEPERTI SEBELUMNYA)
     function getTanggalSekarang() {
         const bln = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Ags","Sep","Okt","Nov","Des"];
         const d = new Date(); 
@@ -279,9 +270,10 @@
     }
 
     async function fetchDatabase() {
+        document.getElementById('loading-overlay').innerText = 'Memuat Data Sistem...';
         document.getElementById('loading-overlay').classList.remove('hide');
         const { data, error } = await _supabase.from('pelanggan').select('*');
-        if (error) { alert("Koneksi ke Database Gagal! Coba cek API Key."); console.error(error); } 
+        if (error) { alert("Koneksi ke Database Gagal!"); console.error(error); } 
         else { dbPelanggan = data; renderTabel(); }
         document.getElementById('loading-overlay').classList.add('hide');
     }
@@ -416,9 +408,13 @@
         if (modeEditId === null) {
             if (dbPelanggan.find(p => p.id === noForm)) { alert("Nomor Form sudah terdaftar!"); document.getElementById('loading-overlay').classList.add('hide'); return; }
             let riwayat = {"1": getTanggalSekarang(), "2": "", "3": "", "4": ""};
-            await _supabase.from('pelanggan').insert([{ id: noForm, nama: nama, telepon: telepon, alamat: alamat, status: "Pendaftaran Diterima", tgl_buat: Date.now(), riwayat_tgl: riwayat }]);
+            
+            // PROSES INSERT KE DATABASE YANG DILINDUNGI RLS
+            const { error } = await _supabase.from('pelanggan').insert([{ id: noForm, nama: nama, telepon: telepon, alamat: alamat, status: "Pendaftaran Diterima", tgl_buat: Date.now(), riwayat_tgl: riwayat }]);
+            if (error) { alert("Gagal menyimpan data! Akses ditolak oleh server."); document.getElementById('loading-overlay').classList.add('hide'); return; }
         } else {
-            await _supabase.from('pelanggan').update({ nama: nama, telepon: telepon, alamat: alamat }).eq('id', modeEditId);
+            const { error } = await _supabase.from('pelanggan').update({ nama: nama, telepon: telepon, alamat: alamat }).eq('id', modeEditId);
+            if (error) { alert("Gagal memperbarui data! Akses ditolak."); document.getElementById('loading-overlay').classList.add('hide'); return; }
         }
         modalInstance.hide(); fetchDatabase(); 
     }
@@ -440,7 +436,9 @@
             riwayatBaru["tgl_bayar_ts"] = Date.now();
         }
 
-        await _supabase.from('pelanggan').update({ status: statusBaru, riwayat_tgl: riwayatBaru }).eq('id', id);
+        const { error } = await _supabase.from('pelanggan').update({ status: statusBaru, riwayat_tgl: riwayatBaru }).eq('id', id);
+        if (error) { alert("Gagal update status!"); }
+        
         fetchDatabase();
         if (statusBaru === "Proses Pemasangan") { setTimeout(() => { bukaModalPemasangan(id); }, 500); }
     }
@@ -482,13 +480,20 @@
             tgl_kembali: document.getElementById('pm_tgl_kembali').value
         };
 
-        await _supabase.from('pelanggan').update({ riwayat_tgl: riwayatBaru }).eq('id', id);
+        const { error } = await _supabase.from('pelanggan').update({ riwayat_tgl: riwayatBaru }).eq('id', id);
+        if (error) { alert("Gagal update data!"); }
+        
         modalPemasanganIns.hide();
         fetchDatabase();
     }
 
     async function hapusPelanggan(id) {
-        if(confirm("Yakin ingin menghapus secara permanen?")) { document.getElementById('loading-overlay').classList.remove('hide'); await _supabase.from('pelanggan').delete().eq('id', id); fetchDatabase(); }
+        if(confirm("Yakin ingin menghapus secara permanen?")) { 
+            document.getElementById('loading-overlay').classList.remove('hide'); 
+            const { error } = await _supabase.from('pelanggan').delete().eq('id', id); 
+            if (error) { alert("Gagal menghapus data!"); document.getElementById('loading-overlay').classList.add('hide'); }
+            else { fetchDatabase(); }
+        }
     }
 
     function kirimWA(id, linkPintar) {
