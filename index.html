@@ -641,11 +641,12 @@
         }
     }
 
+    // FUNGSI WHATSAPP DENGAN NO. FORM BOLD & TANPA IKON STATUS
     function kirimWA(id, linkPintar) {
         let p = dbPelanggan[findIndexById(id)];
         let noHP = p.telepon.startsWith('0') ? '62' + p.telepon.substring(1) : p.telepon;
         
-        let pesanTeks = `Pelanggan Aetra Tangerang Yth.,\n\nTerima kasih sudah mendaftar sambungan baru atas nama *${p.nama}* dengan No. Form ${p.id}.\n\nStatus pemasangan Anda saat ini:\n📋 *${p.status}*\n\nAnda dapat memantau progres selengkapnya kapan saja secara real-time melalui tautan berikut:\n${linkPintar}\n\nUntuk informasi dan keluhan:\n* Contact Center 24 jam: 021 5985474\n* WhatsApp: 087788224645\n* Website: www.aetratangerang.co.id\n* Twitter: @AetraTNG\n* Instagram: @aetratangerang\n\nTerima kasih,\nAetra Air Tangerang`;
+        let pesanTeks = `Pelanggan Aetra Tangerang Yth.,\n\nTerima kasih sudah mendaftar sambungan baru atas nama *${p.nama}* dengan No. Form *${p.id}*.\n\nStatus pemasangan Anda saat ini:\n*${p.status}*\n\nAnda dapat memantau progres selengkapnya kapan saja secara real-time melalui tautan berikut:\n${linkPintar}\n\nUntuk informasi dan keluhan:\n* Contact Center 24 jam: 021 5985474\n* WhatsApp: 087788224645\n* Website: www.aetratangerang.co.id\n* Twitter: @AetraTNG\n* Instagram: @aetratangerang\n\nTerima kasih,\nAetra Air Tangerang`;
 
         window.open(`https://wa.me/${noHP}?text=${encodeURIComponent(pesanTeks)}`, '_blank');
     }
