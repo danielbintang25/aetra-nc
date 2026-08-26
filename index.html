@@ -17,7 +17,6 @@
         .navbar { background-color: #ffffff !important; border-bottom: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); padding: 12px 24px; }
         .navbar-brand { color: #0f172a !important; font-weight: 700; font-size: 1.25rem; letter-spacing: -0.5px;}
         
-        /* KPI CARDS DENGAN AKSEN WARNA HALUS DI KIRI (ANTI-MONOTON) */
         .kpi-card { border: none; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); padding: 1.5rem; transition: transform 0.2s; height: 100%; border-left: 4px solid transparent; }
         .kpi-card:hover { transform: translateY(-3px); }
         .kpi-card-blue { border-left-color: #3b82f6; }
@@ -34,7 +33,7 @@
         .table-toolbar { border-bottom: 1px solid #f1f5f9; padding-bottom: 1rem; margin-bottom: 1rem; }
         
         .table { margin-bottom: 0; }
-        .table thead th { background-color: #f8fafc; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; border-bottom: 1px solid #e2e8f0; padding: 1rem; border-top: none; text-align: center; } /* Rata tengah untuk judul tabel */
+        .table thead th { background-color: #f8fafc; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; border-bottom: 1px solid #e2e8f0; padding: 1rem; border-top: none; text-align: center; }
         .table tbody td { padding: 1rem; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: middle; font-size: 0.875rem; }
         .table tbody tr:hover { background-color: #f8fafc; }
         
@@ -43,7 +42,6 @@
         .form-control:focus, .form-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         .btn { border-radius: 8px; font-weight: 500; font-size: 0.875rem; padding: 0.5rem 1rem; }
         
-        /* TOMBOL TAMBAH DATA PRESISI TENGAH */
         .btn-tambah { display: flex; align-items: center; justify-content: center; height: 38px; width: 100%; font-weight: 600; }
 
         .badge-sla { font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; font-weight: 600;}
@@ -84,7 +82,6 @@
 </nav>
 
 <div class="container-fluid main-container">
-    <!-- KPI CARDS DENGAN AKSEN WARNA HALUS -->
     <div class="row g-4 mb-4">
         <div class="col-md-3">
             <div class="kpi-card kpi-card-blue">
@@ -533,12 +530,17 @@
         }
     }
 
+    // TEMPLATE PESAN WHATSAPP BARU & NOMOR CS 087788224645
     function kirimWA(id, linkPintar) {
         let p = dbPelanggan[findIndexById(id)];
         let noHP = p.telepon.startsWith('0') ? '62' + p.telepon.substring(1) : p.telepon;
-        let pesanTeks = `Halo *${p.nama}*,\n\nTerima kasih sudah mendaftar sambungan baru dengan Aetra Air Tangerang dengan Nomor Form: *${p.id}*.\n\nStatus pendaftaran Anda saat ini:\n*${p.status}*\n\nPantau progres lengkapnya secara real-time di sini:\n${linkPintar}\n\nUntuk informasi lebih lanjut bisa hubungi CS AETRA\n\nTerima kasih,\nAetra Air Tangerang`;
+        
+        let pesanTeks = `Pelanggan Aetra Tangerang Yth.,\n\nTerima kasih sudah mendaftar sambungan baru atas nama *${p.nama}* dengan No. Form ${p.id}.\n\nStatus pemasangan Anda saat ini:\n📋 *${p.status}*\n\nAnda dapat memantau progres selengkapnya kapan saja secara real-time melalui tautan berikut:\n${linkPintar}\n\nUntuk informasi dan keluhan:\n* Contact Center 24 jam: 021 5985474\n* WhatsApp: 087788224645\n* Website: www.aetratangerang.co.id\n* Twitter: @AetraTNG\n* Instagram: @aetratangerang\n\nTerima kasih,\nAetra Air Tangerang`;
+
         window.open(`https://wa.me/${noHP}?text=${encodeURIComponent(pesanTeks)}`, '_blank');
     }
+
+    fetchDatabase();
 </script>
 </body>
 </html>
