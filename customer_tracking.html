@@ -47,10 +47,9 @@
             <div class="step-icon">2</div><h6 class="mb-1">Pembayaran Diterima</h6>
             <span id="tgl-2" class="tgl-badge hide" style="display:block; width:fit-content;"></span>
             
-            <!-- Perubahan Kata Estimasi Menjadi Batas Maksimal -->
+            <!-- Teks "Hari ke-" DIHAPUS, hanya menyisakan batas maksimal tanggal -->
             <div id="sla-badge" class="sla-badge hide">
-                ⏱️ <strong>Batas maksimal pemasangan: <span id="sla-tgl-max"></span></strong><br/>
-                <span class="text-muted">(Maks. 14 Hari Kerja - <span id="sla-text"></span>)</span>
+                ⏱️ <strong>Batas maksimal pemasangan: <span id="sla-tgl-max"></span></strong>
             </div>
         </div>
         
@@ -78,7 +77,8 @@
 
         <div class="mt-5 text-center border-top pt-4">
             <p class="small text-muted mb-2">Butuh bantuan atau informasi lebih lanjut?</p>
-            <a href="https://wa.me/6281260848173" class="btn btn-cs w-100 fw-bold shadow-sm" target="_blank">💬 Hubungi CS Aetra</a>
+            <!-- NOMOR CS DIUBAH MENJADI 087788224645 -->
+            <a href="https://wa.me/6287788224645" class="btn btn-cs w-100 fw-bold shadow-sm" target="_blank">💬 Hubungi CS Aetra</a>
         </div>
     </div>
 </div>
@@ -100,17 +100,6 @@
         return `${d.getDate()} ${bln[d.getMonth()]} ${d.getFullYear()}`;
     }
 
-    function hitungHariKerja(startDateTs) {
-        let start = new Date(startDateTs); let today = new Date(); let count = 0;
-        let cur = new Date(start); cur.setHours(0,0,0,0); today.setHours(0,0,0,0);
-        while(cur <= today) {
-            let day = cur.getDay();
-            if(day !== 0 && day !== 6) count++; 
-            cur.setDate(cur.getDate() + 1);
-        }
-        return count > 0 ? count : 1; 
-    }
-
     async function loadDataLive() {
         if (!customerId) { document.getElementById('loading-screen').classList.add('hide'); document.getElementById('error-screen').classList.remove('hide'); return; }
         const { data, error } = await _supabase.from('pelanggan').select('*').eq('id', customerId);
@@ -129,7 +118,7 @@
 
             let maxSlaDateStr = "";
             let isPendingSLA = false;
-            let isTertunda = false; // Flag untuk mengecek apakah proyek ditunda
+            let isTertunda = false;
             
             if (riwayat.tgl_bayar_ts) {
                 let start = new Date(riwayat.tgl_bayar_ts);
@@ -146,7 +135,6 @@
                     if (jadwalDate > start) isPendingSLA = true;
                 }
                 
-                // Pengecekan Kondisi Lapangan Tertunda
                 if (riwayat.detail_pemasangan && riwayat.detail_pemasangan.kondisi === "Tertunda") {
                     isTertunda = true;
                 }
@@ -179,11 +167,9 @@
                     iconDiv.className = 'step-icon icon-pending'; textTitle.classList.add('text-pending');
                 }
 
-                // TAMPILKAN SLA HANYA JIKA TIDAK PENDING MELEWATI 14 HARI DAN TIDAK TERTUNDA
+                // TAMPILKAN BATAS MAKSIMAL PEMASANGAN TANPA TEKS HARI KE-
                 if (i === 2 && (currentStep === 2 || currentStep === 3) && riwayat.tgl_bayar_ts && !isPendingSLA && !isTertunda) {
-                    let hariKe = hitungHariKerja(riwayat.tgl_bayar_ts);
                     document.getElementById('sla-tgl-max').innerText = maxSlaDateStr;
-                    document.getElementById('sla-text').innerText = `Hari ke-${hariKe}`;
                     document.getElementById('sla-badge').classList.remove('hide');
                 }
 
