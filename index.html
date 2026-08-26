@@ -14,14 +14,15 @@
         .sidebar { position: fixed; top: 0; left: 0; width: 240px; height: 100vh; background: #ffffff; border-right: 1px solid #e2e8f0; z-index: 1000; padding: 20px; display: flex; flex-direction: column; transition: transform 0.3s ease; }
         .sidebar.collapsed { transform: translateX(-240px); }
         
-        .sidebar-brand { margin-bottom: 30px; padding-left: 5px; }
-        .sidebar-brand img { max-height: 38px; width: auto; object-fit: contain; }
+        /* LOGO DIPERBESAR DAN POSISI DI TENGAH */
+        .sidebar-brand { text-align: center; margin-bottom: 30px; padding: 0; }
+        .sidebar-brand img { max-height: 70px; width: auto; object-fit: contain; display: inline-block; }
 
         .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .sidebar-menu li a { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #64748b; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 0.9rem; transition: 0.2s; }
         .sidebar-menu li.active a { background-color: #eff6ff; color: #2563eb; }
 
-        /* MAIN WRAPPER (DEFAULT EXPANDED KARENA SIDEBAR TERTUTUP) */
+        /* MAIN WRAPPER (DEFAULT EXPANDED) */
         .main-wrapper { margin-left: 0; min-height: 100vh; display: flex; flex-direction: column; transition: margin-left 0.3s ease; }
         .main-wrapper:not(.expanded) { margin-left: 240px; }
 
@@ -95,7 +96,7 @@
 <!-- SIDEBAR MENU UTAMA (DEFAULT COLLAPSED/TERTUTUP) -->
 <div class="sidebar collapsed" id="appSidebar">
     <div class="sidebar-brand">
-        <img src="logo.jpg" alt="Aetra Logo" style="max-height: 38px; width: auto; object-fit: contain;">
+        <img src="Logo-Aetra-Air-Tangerang_Small.jpg" alt="Aetra Logo">
     </div>
     <ul class="sidebar-menu">
         <li class="active"><a href="#">📊 Dashboard</a></li>
