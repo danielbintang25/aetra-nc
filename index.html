@@ -6,75 +6,151 @@
     <title>Aetra - Admin Dashboard NC</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #0056b3; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        /* FONT & BODY MODERN */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { background-color: #f7f9fc; font-family: 'Inter', sans-serif; color: #1e293b; }
+        
+        /* OVERLAYS & LOGIN */
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #0f172a; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .hide { display: none !important; }
-        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255,255,255,0.8); z-index: 9998; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: #0056b3;}
-        .badge-sla { font-size: 12px; padding: 5px 8px; }
-        .table-toolbar { background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; }
-        /* Style tambahan untuk mempercantik KPI Pemasangan Selesai */
-        .kpi-box-success { background-color: #198754; color: white; border-radius: 6px; padding: 5px; text-align: center; font-size: 13px; font-weight: bold;}
-        .kpi-box-danger { background-color: #dc3545; color: white; border-radius: 6px; padding: 5px; text-align: center; font-size: 13px; font-weight: bold;}
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255,255,255,0.9); z-index: 9998; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px; color: #3b82f6;}
+        
+        /* NAVBAR CLEAN */
+        .navbar { background-color: #ffffff !important; border-bottom: 1px solid #e2e8f0; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); padding: 12px 24px; }
+        .navbar-brand { color: #0f172a !important; font-weight: 700; font-size: 1.25rem; letter-spacing: -0.5px;}
+        
+        /* KPI CARDS MODERN SOFT UI */
+        .kpi-card { border: none; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); padding: 1.5rem; transition: transform 0.2s; height: 100%; }
+        .kpi-card:hover { transform: translateY(-3px); }
+        .kpi-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 0.5rem; }
+        .kpi-val { font-size: 2rem; font-weight: 700; color: #0f172a; line-height: 1.2; margin-bottom: 0;}
+        .kpi-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        
+        /* TABLE & CONTAINER */
+        .main-container { padding: 2rem; }
+        .table-container { background: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); padding: 1.25rem; border: none; }
+        .table-toolbar { border-bottom: 1px solid #f1f5f9; padding-bottom: 1rem; margin-bottom: 1rem; }
+        
+        .table { margin-bottom: 0; }
+        .table thead th { background-color: #f8fafc; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; border-bottom: 1px solid #e2e8f0; padding: 1rem; border-top: none; }
+        .table tbody td { padding: 1rem; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: middle; font-size: 0.875rem; }
+        .table tbody tr:hover { background-color: #f8fafc; }
+        
+        /* FORM CONTROLS SOFT */
+        .form-label { font-weight: 600; color: #475569; margin-bottom: 0.25rem; }
+        .form-control, .form-select { border-color: #cbd5e1; border-radius: 8px; box-shadow: none; font-size: 0.875rem; padding: 0.5rem 0.75rem; }
+        .form-control:focus, .form-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .btn { border-radius: 8px; font-weight: 500; font-size: 0.875rem; padding: 0.5rem 1rem; }
+        
+        /* BADGES */
+        .badge-sla { font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; font-weight: 600;}
+        .bg-soft-warning { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a;}
+        .bg-soft-danger { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;}
+        .bg-soft-success { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;}
+        .bg-soft-secondary { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;}
+        
+        /* MODAL CLEAN */
+        .modal-content { border-radius: 16px; border: none; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .modal-header { border-bottom: 1px solid #f1f5f9; background: #ffffff; color: #0f172a; border-radius: 16px 16px 0 0; padding: 1.5rem; }
+        .modal-body { padding: 1.5rem; }
+        .modal-footer { border-top: 1px solid #f1f5f9; padding: 1.5rem; }
+        .modal-title { font-weight: 700; font-size: 1.15rem; }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-light">
+<body>
 
-<div id="loading-overlay">Menyambungkan ke Database Server...</div>
+<div id="loading-overlay">Memuat Data Sistem...</div>
 
 <div id="login-screen">
-    <div class="card p-4 shadow-lg" style="width: 350px; border-radius: 15px;">
-        <div class="text-center mb-4"><h4 class="fw-bold text-primary">Aetra Smart Connect</h4><p class="text-muted small">Admin Panel</p></div>
+    <div class="card p-4 shadow-lg border-0" style="width: 360px; border-radius: 20px; background: #ffffff;">
+        <div class="text-center mb-4">
+            <h4 class="fw-bold" style="color: #0f172a;">Aetra Connect</h4>
+            <p class="text-muted small">Admin Workspace Panel</p>
+        </div>
         <input type="text" id="username" class="form-control mb-3" placeholder="Username (admin)">
         <input type="password" id="password" class="form-control mb-3" placeholder="Password (admin123)" onkeypress="if(event.key === 'Enter') cekLogin()">
-        <button class="btn btn-primary w-100 fw-bold" onclick="cekLogin()">Login Masuk</button>
-        <p id="error-login" class="text-danger text-center mt-3 mb-0 small hide">Gagal Login! Cek Username/Password.</p>
+        <button class="btn btn-primary w-100 fw-bold py-2" onclick="cekLogin()">Masuk Dashboard</button>
+        <p id="error-login" class="text-danger text-center mt-3 mb-0 small hide fw-medium">Gagal Login! Periksa kredensial Anda.</p>
     </div>
 </div>
 
-<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #0056b3;">
-    <div class="container-fluid"><a class="navbar-brand fw-bold" href="#">Aetra Smart Connect - Admin Panel</a><button class="btn btn-danger btn-sm fw-bold" onclick="logout()">Logout</button></div>
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand" href="#">Aetra Smart Connect</a>
+        <button class="btn btn-outline-secondary btn-sm fw-bold" onclick="logout()">Logout</button>
+    </div>
 </nav>
 
-<div class="container-fluid mt-4 px-4">
-    <!-- KPI DESAIN TERBARU -->
-    <div class="row mb-4">
-        <!-- Tulisan (Filter) dihapus -->
-        <div class="col-md-3"><div class="card text-white bg-primary shadow-sm"><div class="card-body"><h6 class="card-title">Total Pendaftaran</h6><h3 id="kpi-total">0</h3></div></div></div>
-        <div class="col-md-3"><div class="card text-white bg-warning text-dark shadow-sm"><div class="card-body"><h6 class="card-title">Pembayaran Diterima</h6><h3 id="kpi-bayar">0</h3></div></div></div>
-        <div class="col-md-3"><div class="card text-dark bg-info shadow-sm"><div class="card-body"><h6 class="card-title">Proses Pemasangan</h6><h3 id="kpi-proses">0</h3></div></div></div>
+<div class="container-fluid main-container">
+    <!-- KPI CARDS MODERN -->
+    <div class="row g-4 mb-4">
         <div class="col-md-3">
-            <div class="card text-white bg-success shadow-sm">
-                <div class="card-body pb-2">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="card-title mb-0">Total Selesai</h6>
-                        <h4 id="kpi-selesai" class="mb-0 fw-bold">0</h4>
-                    </div>
-                    <!-- Desain Sukses dan Gagal Dipisah Rapi -->
-                    <div class="row g-1 border-top border-light pt-2 mt-1">
-                        <div class="col-6"><div class="kpi-box-success">✅ Sukses: <span id="kpi-sukses">0</span></div></div>
-                        <div class="col-6"><div class="kpi-box-danger">❌ Gagal: <span id="kpi-gagal">0</span></div></div>
-                    </div>
+            <div class="kpi-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div><p class="kpi-title">Total Pendaftaran</p><h3 class="kpi-val" id="kpi-total">0</h3></div>
+                    <div class="kpi-icon" style="background:#eff6ff; color:#3b82f6;">📝</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div><p class="kpi-title">Pembayaran Diterima</p><h3 class="kpi-val" id="kpi-bayar">0</h3></div>
+                    <div class="kpi-icon" style="background:#fef3c7; color:#d97706;">💳</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div><p class="kpi-title">Proses Pemasangan</p><h3 class="kpi-val" id="kpi-proses">0</h3></div>
+                    <div class="kpi-icon" style="background:#e0f2fe; color:#0284c7;">⚙️</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div><p class="kpi-title">Total Selesai</p><h3 class="kpi-val" id="kpi-selesai">0</h3></div>
+                    <div class="kpi-icon" style="background:#dcfce7; color:#16a34a;">✅</div>
+                </div>
+                <div class="d-flex gap-3 pt-2 mt-1 border-top" style="border-color: #f1f5f9 !important;">
+                    <div><span style="color:#16a34a; font-size:12px; font-weight:600;">✓ Sukses: </span><span class="small fw-bold text-dark" id="kpi-sukses">0</span></div>
+                    <div><span style="color:#dc2626; font-size:12px; font-weight:600;">✕ Gagal: </span><span class="small fw-bold text-dark" id="kpi-gagal">0</span></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card shadow-sm mb-5 border-0">
-        <div class="card-header table-toolbar p-3">
-            <div class="row g-2 align-items-end">
-                <div class="col-md-2"><label class="form-label small fw-bold text-muted mb-1">Status:</label><select id="filterStatus" class="form-select form-select-sm border-secondary" onchange="renderTabel()"><option value="Semua">Semua Status</option><option value="Pendaftaran Diterima">Pendaftaran Diterima</option><option value="Pembayaran Diterima">Pembayaran Diterima</option><option value="Proses Pemasangan">Proses Pemasangan</option><option value="Selesai">Selesai</option></select></div>
-                <div class="col-md-2"><label class="form-label small fw-bold text-muted mb-1">Bulan Masuk:</label><select id="filterBulan" class="form-select form-select-sm border-secondary" onchange="renderTabel()"><option value="Semua">Semua Bulan</option><option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option><option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option></select></div>
-                <div class="col-md-2"><label class="form-label small fw-bold text-muted mb-1">Tahun Masuk:</label><select id="filterTahun" class="form-select form-select-sm border-secondary" onchange="renderTabel()"><option value="Semua">Semua Tahun</option><option value="2026">2026</option><option value="2027">2027</option></select></div>
-                <div class="col-md-2"><label class="form-label small fw-bold text-muted mb-1">Urutkan Data:</label><select id="sortTanggal" class="form-select form-select-sm border-secondary" onchange="renderTabel()"><option value="baru">Paling Baru ke Lama</option><option value="lama">Paling Lama ke Baru</option></select></div>
-                <div class="col-md-2"><label class="form-label small fw-bold text-muted mb-1">Cari No. Form/Nama:</label><input type="text" id="searchInput" class="form-control form-control-sm border-secondary" placeholder="Ketik pencarian..." onkeyup="renderTabel()"></div>
-                <div class="col-md-2 text-md-end"><button class="btn btn-primary btn-sm fw-bold w-100 h-100" onclick="bukaModalTambah()">+ Tambah Data</button></div>
+    <!-- MAIN TABLE AREA -->
+    <div class="table-container">
+        <!-- FILTER TOOLBAR -->
+        <div class="table-toolbar">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2"><label class="form-label small">Filter Status</label><select id="filterStatus" class="form-select form-select-sm" onchange="renderTabel()"><option value="Semua">Semua Status</option><option value="Pendaftaran Diterima">Pendaftaran Diterima</option><option value="Pembayaran Diterima">Pembayaran Diterima</option><option value="Proses Pemasangan">Proses Pemasangan</option><option value="Selesai">Selesai</option></select></div>
+                <div class="col-md-2"><label class="form-label small">Bulan Masuk</label><select id="filterBulan" class="form-select form-select-sm" onchange="renderTabel()"><option value="Semua">Semua Bulan</option><option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option><option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option></select></div>
+                <div class="col-md-2"><label class="form-label small">Tahun Masuk</label><select id="filterTahun" class="form-select form-select-sm" onchange="renderTabel()"><option value="Semua">Semua Tahun</option><option value="2026">2026</option><option value="2027">2027</option></select></div>
+                <div class="col-md-2"><label class="form-label small">Urutkan Data</label><select id="sortTanggal" class="form-select form-select-sm" onchange="renderTabel()"><option value="baru">Terbaru ke Lama</option><option value="lama">Terlama ke Baru</option></select></div>
+                <div class="col-md-2"><label class="form-label small">Pencarian</label><input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Ketik No. Form / Nama..." onkeyup="renderTabel()"></div>
+                <div class="col-md-2 text-md-end"><button class="btn btn-primary btn-sm fw-bold w-100" style="height: 31px;" onclick="bukaModalTambah()">+ Tambah Data</button></div>
             </div>
         </div>
         
-        <div class="card-body p-0 overflow-auto">
-            <table class="table table-hover align-middle mb-0" style="font-size: 14px;">
-                <thead class="table-primary">
-                    <tr><th class="ps-3">No.</th><th>No. Form</th><th>Tgl Masuk</th><th>Tgl Bayar</th><th>Tgl Pasang</th><th>SLA Pasang</th><th>Nama</th><th>No. HP</th><th style="min-width: 170px;">Status</th><th class="text-center pe-3" style="min-width: 220px;">Aksi</th></tr>
+        <!-- TABLE -->
+        <div class="overflow-auto">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th class="ps-3" style="width: 50px;">No.</th>
+                        <th>No. Form</th>
+                        <th>Tgl Masuk</th>
+                        <th>Tgl Bayar</th>
+                        <th>Tgl Pasang</th>
+                        <th>SLA Pasang</th>
+                        <th>Pelanggan</th>
+                        <th style="min-width: 170px;">Status</th>
+                        <th class="text-end pe-3" style="min-width: 220px;">Aksi</th>
+                    </tr>
                 </thead>
                 <tbody id="tabel-pelanggan"></tbody>
             </table>
@@ -82,17 +158,18 @@
     </div>
 </div>
 
+<!-- MODALS KETIKAN SAMA, DESAIN DIUBAH VIA CSS -->
 <div class="modal fade" id="modalForm" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header bg-primary text-white"><h5 class="modal-title" id="modalTitle">Registrasi Sambungan Baru</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+      <div class="modal-header"><h5 class="modal-title" id="modalTitle">Registrasi Baru</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body">
-        <div class="mb-3"><label class="form-label">No. Form</label><input type="text" id="inputNoForm" class="form-control" placeholder="Cth: F-001"><small class="text-muted" id="infoNoForm">Masukkan nomor form fisik.</small></div>
+        <div class="mb-3"><label class="form-label">No. Form</label><input type="text" id="inputNoForm" class="form-control" placeholder="Cth: F-001"></div>
         <div class="mb-3"><label class="form-label">Nama Lengkap</label><input type="text" id="inputNama" class="form-control" placeholder="Masukkan Nama"></div>
         <div class="mb-3"><label class="form-label">No. Telepon (WhatsApp)</label><input type="text" id="inputTelepon" class="form-control" placeholder="Cth: 08123456789"></div>
-        <div class="mb-3"><label class="form-label">Alamat Lengkap</label><input type="text" id="inputAlamat" class="form-control" placeholder="Cth: Perumahan Karawaci..."></div>
+        <div class="mb-3"><label class="form-label">Alamat Lengkap</label><input type="text" id="inputAlamat" class="form-control" placeholder="Ketik alamat lengkap..."></div>
       </div>
-      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="button" id="btnSimpan" class="btn btn-primary" onclick="simpanPelanggan()">Simpan Data</button></div>
+      <div class="modal-footer"><button type="button" class="btn btn-light border" data-bs-dismiss="modal">Batal</button><button type="button" id="btnSimpan" class="btn btn-primary" onclick="simpanPelanggan()">Simpan Data</button></div>
     </div>
   </div>
 </div>
@@ -100,16 +177,16 @@
 <div class="modal fade" id="modalPemasangan" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header bg-info text-dark"><h5 class="modal-title fw-bold">⚙️ Detail Operasional Pemasangan</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-header"><h5 class="modal-title">Detail Operasional</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body">
         <input type="hidden" id="pm_id">
-        <h6 class="fw-bold text-primary border-bottom pb-2">1. Data Internal</h6>
+        <p class="text-muted small fw-bold text-uppercase mb-2">1. Data Internal</p>
         <div class="mb-2"><label class="form-label small">Tanggal Cetak SO (Internal)</label><input type="date" id="pm_tgl_so" class="form-control form-control-sm"></div>
-        <div class="mb-3"><label class="form-label small">Nama Tim/Kontraktor Pelaksana</label><input type="text" id="pm_kontraktor" class="form-control form-control-sm" placeholder="Ketik nama tim..."></div>
+        <div class="mb-4"><label class="form-label small">Nama Tim/Kontraktor Pelaksana</label><input type="text" id="pm_kontraktor" class="form-control form-control-sm" placeholder="Ketik nama tim..."></div>
         
-        <h6 class="fw-bold text-primary border-bottom pb-2">2. Laporan Lapangan (Tampil ke Pelanggan)</h6>
-        <div class="mb-2"><label class="form-label small text-success fw-bold">Tanggal Pemasangan</label><input type="date" id="pm_jadwal" class="form-control form-control-sm"></div>
-        <div class="mb-2">
+        <p class="text-muted small fw-bold text-uppercase mb-2">2. Laporan Lapangan (Tampil ke Pelanggan)</p>
+        <div class="mb-2"><label class="form-label small fw-bold" style="color:#0f172a;">Tanggal Pemasangan</label><input type="date" id="pm_jadwal" class="form-control form-control-sm"></div>
+        <div class="mb-3">
             <label class="form-label small">Kondisi Lapangan</label>
             <select id="pm_kondisi" class="form-select form-select-sm border-warning" onchange="toggleKendala()">
                 <option value="">-- Belum Ada Laporan --</option>
@@ -118,9 +195,9 @@
                 <option value="Gagal">❌ Gagal / Batal</option>
             </select>
         </div>
-        <div id="boxKendala" class="hide p-2 bg-light border rounded">
+        <div id="boxKendala" class="hide p-3 bg-light rounded" style="border: 1px dashed #cbd5e1;">
             <div class="mb-2">
-                <label class="form-label small text-danger fw-bold">Kategori Kendala</label>
+                <label class="form-label small text-danger">Kategori Kendala</label>
                 <select id="pm_kategori" class="form-select form-select-sm">
                     <option value="">-- Pilih Kategori --</option>
                     <option value="Menunggu konfirmasi akses lokasi dari pelanggan">Menunggu akses lokasi pelanggan</option>
@@ -129,19 +206,17 @@
                     <option value="Lainnya, hubungi CS">Lainnya (Hubungi CS)</option>
                 </select>
             </div>
-            <div id="boxJadwalUlang" class="mb-2 hide"><label class="form-label small text-info fw-bold">Tanggal Janji/Jadwal Ulang</label><input type="date" id="pm_tgl_kembali" class="form-control form-control-sm"></div>
-            <div class="mb-2"><label class="form-label small">Catatan Tambahan Admin</label><textarea id="pm_catatan" class="form-control form-control-sm" rows="2" placeholder="Ketikan detail untuk dibaca pelanggan..."></textarea></div>
+            <div id="boxJadwalUlang" class="mb-2 hide"><label class="form-label small text-info">Tanggal Janji/Jadwal Ulang</label><input type="date" id="pm_tgl_kembali" class="form-control form-control-sm"></div>
+            <div class="mb-0"><label class="form-label small">Catatan Tambahan Admin</label><textarea id="pm_catatan" class="form-control form-control-sm" rows="2" placeholder="Ketikan detail untuk dibaca pelanggan..."></textarea></div>
         </div>
       </div>
-      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button><button type="button" class="btn btn-primary fw-bold" onclick="simpanDetailPemasangan()">Simpan & Update Pelanggan</button></div>
+      <div class="modal-footer"><button type="button" class="btn btn-light border" data-bs-dismiss="modal">Tutup</button><button type="button" class="btn btn-primary" onclick="simpanDetailPemasangan()">Update Status</button></div>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // ===================================================================
-    // MASUKKAN KEMBALI API KEY SUPABASE ANDA DI SINI
     // ===================================================================
     const SUPABASE_URL = 'https://vyngziqwsdhetapjzlgr.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5bmd6aXF3c2RoZXRhcGp6bGdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4ODE0ODIsImV4cCI6MjEwMjQ1NzQ4Mn0._uJcP6YPkXH6mQmIHW-vrKOZIguHGKI_72zEWYei24s';
@@ -246,10 +321,6 @@
 
         let nomorUrut = 1;
         dataTampil.forEach((row) => {
-            let statusColor = "bg-secondary";
-            if(row.status === "Pembayaran Diterima") statusColor = "bg-primary";
-            if(row.status === "Pendaftaran Diterima") statusColor = "bg-info text-dark";
-            if(row.status === "Selesai") statusColor = "bg-success";
             
             let tglMasuk = row.riwayat_tgl && row.riwayat_tgl["1"] ? row.riwayat_tgl["1"].split(',')[0] : "-";
             let tglBayar = row.riwayat_tgl && row.riwayat_tgl["2"] ? row.riwayat_tgl["2"].split(',')[0] : "-";
@@ -265,13 +336,11 @@
                 maxSlaDateStr = formatTanggal(start.toISOString().split('T')[0]);
             }
 
-            // PERUBAHAN FONT BATAS TANGGAL
             let tglPasang = "-";
             if (row.riwayat_tgl && row.riwayat_tgl.detail_pemasangan && row.riwayat_tgl.detail_pemasangan.jadwal) {
-                tglPasang = `<span class="fw-bold" style="color: #0056b3;">${formatTanggal(row.riwayat_tgl.detail_pemasangan.jadwal)}</span>`;
+                tglPasang = `<span class="fw-bold" style="color: #0f172a;">${formatTanggal(row.riwayat_tgl.detail_pemasangan.jadwal)}</span>`;
             } else if (maxSlaDateStr !== "-") {
-                // Diubah agar font tidak italic dan warnanya disesuaikan
-                tglPasang = `<span style="color: #6c757d;">Batas: ${maxSlaDateStr}</span>`;
+                tglPasang = `<span style="color: #64748b;">Batas: ${maxSlaDateStr}</span>`;
             }
 
             let slaHtml = "-";
@@ -282,14 +351,14 @@
                 }
 
                 if (pendingStatus) {
-                    slaHtml = `<span class="badge bg-secondary badge-sla">Pending</span>`;
+                    slaHtml = `<span class="badge-sla bg-soft-secondary">Pending</span>`;
                 } else {
                     let hKerja = hitungHariKerja(row.riwayat_tgl.tgl_bayar_ts);
-                    if (hKerja <= 14) { slaHtml = `<span class="badge bg-warning text-dark badge-sla">Hr ke-${hKerja}/14</span>`; } 
-                    else { slaHtml = `<span class="badge bg-danger badge-sla">Lewat (${hKerja}/14)</span>`; }
+                    if (hKerja <= 14) { slaHtml = `<span class="badge-sla bg-soft-warning">Hr ke-${hKerja}/14</span>`; } 
+                    else { slaHtml = `<span class="badge-sla bg-soft-danger">Lewat (${hKerja}/14)</span>`; }
                 }
             } else if (row.status === "Selesai") { 
-                slaHtml = `<span class="badge bg-success badge-sla">Tuntas</span>`; 
+                slaHtml = `<span class="badge-sla bg-soft-success">Tuntas</span>`; 
             }
 
             let basePath = window.location.href.split('?')[0];
@@ -300,18 +369,22 @@
             }
             const linkTracker = basePath + 'customer_tracking.html?id=' + row.id;
 
-            let btnDetailPasang = (row.status === "Proses Pemasangan") ? `<button class="btn btn-sm btn-info w-100 fw-bold mt-1" onclick="bukaModalPemasangan('${row.id}')">⚙️ Detail Pasang</button>` : '';
+            let btnDetailPasang = (row.status === "Proses Pemasangan") ? `<button class="btn btn-sm btn-light border w-100 fw-bold mt-2" onclick="bukaModalPemasangan('${row.id}')" style="color:#0284c7;">⚙️ Info Pemasangan</button>` : '';
 
             const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td class="fw-bold ps-3">${nomorUrut++}</td><td class="fw-bold text-primary">${row.id}</td>
-                <td class="small fw-bold text-muted">${tglMasuk}</td>
-                <td class="small fw-bold text-success">${tglBayar}</td>
-                <td class="small">${tglPasang}</td>
-                <td class="text-center">${slaHtml}</td>
-                <td class="fw-bold">${row.nama}</td><td class="small">${row.telepon}</td>
+                <td class="fw-bold ps-3 text-muted">${nomorUrut++}</td>
+                <td class="fw-bold" style="color:#3b82f6;">${row.id}</td>
+                <td>${tglMasuk}</td>
+                <td class="fw-medium text-success">${tglBayar}</td>
+                <td>${tglPasang}</td>
+                <td>${slaHtml}</td>
                 <td>
-                    <select class="form-select form-select-sm border-${statusColor.split(' ')[0].replace('bg-', '')}" onchange="updateStatus('${row.id}', this.value)">
+                    <div class="fw-bold text-dark">${row.nama}</div>
+                    <div class="small text-muted">${row.telepon}</div>
+                </td>
+                <td>
+                    <select class="form-select form-select-sm" style="background-color: #f8fafc; font-weight:500; border: 1px solid #e2e8f0;" onchange="updateStatus('${row.id}', this.value)">
                         <option value="Pendaftaran Diterima" ${row.status == 'Pendaftaran Diterima' ? 'selected' : ''}>Pendaftaran Diterima</option>
                         <option value="Pembayaran Diterima" ${row.status == 'Pembayaran Diterima' ? 'selected' : ''}>Pembayaran Diterima</option>
                         <option value="Proses Pemasangan" ${row.status == 'Proses Pemasangan' ? 'selected' : ''}>Proses Pemasangan</option>
@@ -319,9 +392,13 @@
                     </select>
                     ${btnDetailPasang}
                 </td>
-                <td class="text-center pe-3">
-                    <div class="btn-group w-100 mb-1"><button class="btn btn-sm btn-warning" onclick="bukaModalEdit('${row.id}')">Edit</button><button class="btn btn-sm btn-danger" onclick="hapusPelanggan('${row.id}')">Hapus</button><a href="${linkTracker}" target="_blank" class="btn btn-sm btn-outline-primary">Buka Link</a></div>
-                    <button class="btn btn-sm btn-success w-100 fw-bold" onclick="kirimWA('${row.id}', '${linkTracker}')">📲 WA</button>
+                <td class="text-end pe-3">
+                    <div class="btn-group mb-1">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="bukaModalEdit('${row.id}')">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="hapusPelanggan('${row.id}')">Hapus</button>
+                        <a href="${linkTracker}" target="_blank" class="btn btn-sm btn-outline-primary">Link</a>
+                    </div>
+                    <button class="btn btn-sm w-100 fw-bold text-white d-block" style="background:#10b981;" onclick="kirimWA('${row.id}', '${linkTracker}')">📲 Kirim WA</button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -329,7 +406,7 @@
     }
 
     function bukaModalTambah() { modeEditId = null; document.getElementById("modalTitle").innerText = "Registrasi Baru"; document.getElementById("inputNoForm").value = ""; document.getElementById("inputNoForm").disabled = false; document.getElementById("inputNama").value = ""; document.getElementById("inputTelepon").value = ""; document.getElementById("inputAlamat").value = ""; modalInstance.show(); }
-    function bukaModalEdit(id) { modeEditId = id; let i = findIndexById(id); document.getElementById("modalTitle").innerText = "Edit Pelanggan"; document.getElementById("inputNoForm").value = dbPelanggan[i].id; document.getElementById("inputNoForm").disabled = true; document.getElementById("inputNama").value = dbPelanggan[i].nama; document.getElementById("inputTelepon").value = dbPelanggan[i].telepon; document.getElementById("inputAlamat").value = dbPelanggan[i].alamat; modalInstance.show(); }
+    function bukaModalEdit(id) { modeEditId = id; let i = findIndexById(id); document.getElementById("modalTitle").innerText = "Edit Data Pelanggan"; document.getElementById("inputNoForm").value = dbPelanggan[i].id; document.getElementById("inputNoForm").disabled = true; document.getElementById("inputNama").value = dbPelanggan[i].nama; document.getElementById("inputTelepon").value = dbPelanggan[i].telepon; document.getElementById("inputAlamat").value = dbPelanggan[i].alamat; modalInstance.show(); }
 
     async function simpanPelanggan() {
         let noForm = document.getElementById("inputNoForm").value, nama = document.getElementById("inputNama").value, telepon = document.getElementById("inputTelepon").value, alamat = document.getElementById("inputAlamat").value;
@@ -411,7 +488,7 @@
     }
 
     async function hapusPelanggan(id) {
-        if(confirm("Yakin ingin menghapus?")) { document.getElementById('loading-overlay').classList.remove('hide'); await _supabase.from('pelanggan').delete().eq('id', id); fetchDatabase(); }
+        if(confirm("Yakin ingin menghapus secara permanen?")) { document.getElementById('loading-overlay').classList.remove('hide'); await _supabase.from('pelanggan').delete().eq('id', id); fetchDatabase(); }
     }
 
     function kirimWA(id, linkPintar) {
