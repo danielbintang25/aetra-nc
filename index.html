@@ -10,18 +10,20 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { background-color: #f4f6f9; font-family: 'Inter', sans-serif; color: #1e293b; margin: 0; overflow-x: hidden; }
         
-        /* SIDEBAR MENU DENGAN ANIMASI TOGGLE */
+        /* SIDEBAR MENU DENGAN ANIMASI TOGGLE (DEFAULT COLLAPSED) */
         .sidebar { position: fixed; top: 0; left: 0; width: 240px; height: 100vh; background: #ffffff; border-right: 1px solid #e2e8f0; z-index: 1000; padding: 20px; display: flex; flex-direction: column; transition: transform 0.3s ease; }
         .sidebar.collapsed { transform: translateX(-240px); }
         
-        .sidebar-brand { font-weight: 700; font-size: 1.05rem; color: #0f172a; margin-bottom: 30px; padding-left: 10px; }
+        .sidebar-brand { margin-bottom: 30px; padding-left: 5px; }
+        .sidebar-brand img { max-height: 38px; width: auto; object-fit: contain; }
+
         .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .sidebar-menu li a { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #64748b; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 0.9rem; transition: 0.2s; }
         .sidebar-menu li.active a { background-color: #eff6ff; color: #2563eb; }
 
-        /* MAIN WRAPPER DENGAN TRANSISI LEBAR */
-        .main-wrapper { margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column; transition: margin-left 0.3s ease; }
-        .main-wrapper.expanded { margin-left: 0; }
+        /* MAIN WRAPPER (DEFAULT EXPANDED KARENA SIDEBAR TERTUTUP) */
+        .main-wrapper { margin-left: 0; min-height: 100vh; display: flex; flex-direction: column; transition: margin-left 0.3s ease; }
+        .main-wrapper:not(.expanded) { margin-left: 240px; }
 
         .top-header { background-color: #0f172a; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         
@@ -50,6 +52,9 @@
         .table tbody td { padding: 1rem; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: middle; font-size: 0.875rem; }
         .table tbody tr:hover { background-color: #f8fafc; }
         
+        /* PERAPIAN DROPDOWN STATUS AGAR TIDAK TERTUTUP PANAH */
+        .table select.form-select { padding-right: 32px !important; text-overflow: ellipsis; }
+
         .form-label { font-weight: 600; color: #475569; margin-bottom: 0.25rem; font-size: 0.8rem; }
         .form-control, .form-select { border-color: #cbd5e1; border-radius: 8px; box-shadow: none; font-size: 0.875rem; padding: 0.5rem 0.75rem; }
         .form-control:focus, .form-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
@@ -87,16 +92,18 @@
     </div>
 </div>
 
-<!-- SIDEBAR MENU UTAMA -->
-<div class="sidebar" id="appSidebar">
-    <div class="sidebar-brand">Aetra Smart Connect</div>
+<!-- SIDEBAR MENU UTAMA (DEFAULT COLLAPSED/TERTUTUP) -->
+<div class="sidebar collapsed" id="appSidebar">
+    <div class="sidebar-brand">
+        <img src="Logo-Aetra-Air-Tangerang_Small.jpg" alt="Aetra Logo">
+    </div>
     <ul class="sidebar-menu">
         <li class="active"><a href="#">📊 Dashboard</a></li>
     </ul>
 </div>
 
-<!-- MAIN CONTENT WRAPPER -->
-<div class="main-wrapper" id="mainWrapper">
+<!-- MAIN CONTENT WRAPPER (DEFAULT EXPANDED) -->
+<div class="main-wrapper expanded" id="mainWrapper">
     <div class="top-header">
         <div class="d-flex align-items-center gap-3">
             <!-- TOMBOL HAMBURGER TOGGLE SIDEBAR -->
@@ -490,11 +497,11 @@
                 <td class="text-end pe-3">
                     <div class="d-flex flex-column align-items-end gap-1">
                         <div class="btn-group btn-group-sm w-100" style="max-width: 190px;">
-                            <button class="btn btn-outline-secondary" onclick="bukaModalEdit('${row.id}')">Edit</button>
-                            <button class="btn btn-outline-danger" onclick="hapusPelanggan('${row.id}')">Hapus</button>
-                            <a href="${linkTracker}" target="_blank" class="btn btn-outline-primary">Link</a>
+                            <button class="btn btn-outline-secondary" onclick="bukaModalEdit('${row.id}')">✏️ Edit</button>
+                            <button class="btn btn-outline-danger" onclick="hapusPelanggan('${row.id}')">🗑️ Hapus</button>
+                            <a href="${linkTracker}" target="_blank" class="btn btn-outline-primary">🔗 Link</a>
                         </div>
-                        <button class="btn btn-sm text-white fw-bold w-100" style="max-width: 190px; background-color: #20b2aa;" onclick="kirimWA('${row.id}', '${linkTracker}')">💬 Kirim WA</button>
+                        <button class="btn btn-sm text-white fw-bold w-100" style="max-width: 190px; background-color: #0d9488;" onclick="kirimWA('${row.id}', '${linkTracker}')">💬 Kirim WA</button>
                     </div>
                 </td>
             `;
