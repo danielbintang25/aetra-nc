@@ -8,17 +8,21 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { background-color: #f4f6f9; font-family: 'Inter', sans-serif; color: #1e293b; margin: 0; }
+        body { background-color: #f4f6f9; font-family: 'Inter', sans-serif; color: #1e293b; margin: 0; overflow-x: hidden; }
         
-        /* SIDEBAR MENU */
-        .sidebar { position: fixed; top: 0; left: 0; width: 240px; height: 100vh; background: #ffffff; border-right: 1px solid #e2e8f0; z-index: 1000; padding: 20px; display: flex; flex-direction: column; }
+        /* SIDEBAR MENU DENGAN ANIMASI TOGGLE */
+        .sidebar { position: fixed; top: 0; left: 0; width: 240px; height: 100vh; background: #ffffff; border-right: 1px solid #e2e8f0; z-index: 1000; padding: 20px; display: flex; flex-direction: column; transition: transform 0.3s ease; }
+        .sidebar.collapsed { transform: translateX(-240px); }
+        
         .sidebar-brand { font-weight: 700; font-size: 1.05rem; color: #0f172a; margin-bottom: 30px; padding-left: 10px; }
         .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .sidebar-menu li a { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #64748b; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 0.9rem; transition: 0.2s; }
         .sidebar-menu li.active a { background-color: #eff6ff; color: #2563eb; }
 
-        /* MAIN WRAPPER & TOP HEADER */
-        .main-wrapper { margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column; }
+        /* MAIN WRAPPER DENGAN TRANSISI LEBAR */
+        .main-wrapper { margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column; transition: margin-left 0.3s ease; }
+        .main-wrapper.expanded { margin-left: 0; }
+
         .top-header { background-color: #0f172a; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         
         #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #0f172a; z-index: 9999; display: flex; align-items: center; justify-content: center; }
@@ -84,7 +88,7 @@
 </div>
 
 <!-- SIDEBAR MENU UTAMA -->
-<div class="sidebar">
+<div class="sidebar" id="appSidebar">
     <div class="sidebar-brand">Aetra Smart Connect</div>
     <ul class="sidebar-menu">
         <li class="active"><a href="#">📊 Dashboard</a></li>
@@ -92,9 +96,13 @@
 </div>
 
 <!-- MAIN CONTENT WRAPPER -->
-<div class="main-wrapper">
+<div class="main-wrapper" id="mainWrapper">
     <div class="top-header">
-        <h5 class="m-0 fw-bold fs-6">Aetra Smart Connect</h5>
+        <div class="d-flex align-items-center gap-3">
+            <!-- TOMBOL HAMBURGER TOGGLE SIDEBAR -->
+            <button class="btn btn-sm text-white fs-5 border-0 p-0 shadow-none" onclick="toggleSidebar()" title="Tutup/Buka Menu">☰</button>
+            <h5 class="m-0 fw-bold fs-6">Aetra Smart Connect</h5>
+        </div>
         <button class="btn btn-outline-light btn-sm fw-bold" onclick="logout()">Logout</button>
     </div>
 
@@ -246,8 +254,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // ===================================================================
-    const SUPABASE_URL = 'https://vyngziqwsdhetapjzlgr.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5bmd6aXF3c2RoZXRhcGp6bGdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4ODE0ODIsImV4cCI6MjEwMjQ1NzQ4Mn0._uJcP6YPkXH6mQmIHW-vrKOZIguHGKI_72zEWYei24s';
+    const SUPABASE_URL = 'https://vyngziqwsdhetapzjlsr.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5bmd6aXF3c2RoZXRhcHpqbHNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4ODE0ODIsImV4cCI6MjEwMjQ1NzQ4Mn0._uJcP6YPkXH6mQmIHW-vrKOZIguHGKI_72zEWYei24s'; 
     // ===================================================================
 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -258,6 +266,14 @@
     let modeEditId = null; 
     let currentPage = 1;
     let pageSize = 10;
+
+    // FUNGSI TOGGLE SIDEBAR BUKA/TUTUP
+    function toggleSidebar() {
+        const sidebar = document.getElementById('appSidebar');
+        const mainWrapper = document.getElementById('mainWrapper');
+        sidebar.classList.toggle('collapsed');
+        mainWrapper.classList.toggle('expanded');
+    }
 
     _supabase.auth.getSession().then(({ data: { session } }) => {
         if (session) {
