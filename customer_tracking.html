@@ -47,8 +47,9 @@
             <div class="step-icon">2</div><h6 class="mb-1">Pembayaran Diterima</h6>
             <span id="tgl-2" class="tgl-badge hide" style="display:block; width:fit-content;"></span>
             
+            <!-- Perubahan Kata Estimasi Menjadi Batas Maksimal -->
             <div id="sla-badge" class="sla-badge hide">
-                ⏱️ <strong>Estimasi dilakukan pemasangan: <span id="sla-tgl-max"></span></strong><br/>
+                ⏱️ <strong>Batas maksimal pemasangan: <span id="sla-tgl-max"></span></strong><br/>
                 <span class="text-muted">(Maks. 14 Hari Kerja - <span id="sla-text"></span>)</span>
             </div>
         </div>
@@ -84,7 +85,7 @@
 
 <script>
     // ===================================================================
-    const SUPABASE_URL = 'https://vyngziqwsdhetapjzlgr.supabase.co';
+    const SUPABASE_URL = 'https://vyngziqwsdhetapjzlgr.supabase.co/rest/v1/';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5bmd6aXF3c2RoZXRhcGp6bGdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4ODE0ODIsImV4cCI6MjEwMjQ1NzQ4Mn0._uJcP6YPkXH6mQmIHW-vrKOZIguHGKI_72zEWYei24s';
     // ===================================================================
 
@@ -126,9 +127,9 @@
             const currentStep = statusMap[customerData.status];
             let riwayat = customerData.riwayat_tgl;
 
-            // LOGIKA MENYEMBUNYIKAN SLA JIKA JADWAL TERTUNDA MELEWATI 14 HARI
             let maxSlaDateStr = "";
             let isPendingSLA = false;
+            let isTertunda = false; // Flag untuk mengecek apakah proyek ditunda
             
             if (riwayat.tgl_bayar_ts) {
                 let start = new Date(riwayat.tgl_bayar_ts);
@@ -144,6 +145,11 @@
                     let jadwalDate = new Date(riwayat.detail_pemasangan.jadwal);
                     if (jadwalDate > start) isPendingSLA = true;
                 }
+                
+                // Pengecekan Kondisi Lapangan Tertunda
+                if (riwayat.detail_pemasangan && riwayat.detail_pemasangan.kondisi === "Tertunda") {
+                    isTertunda = true;
+                }
             }
 
             for (let i = 1; i <= 4; i++) {
@@ -155,18 +161,14 @@
                 tglBadge.classList.add('hide');
 
                 if (i < currentStep) {
-                    // Tahapan yang sudah dilewati -> Hijau
                     iconDiv.className = 'step-icon icon-done'; iconDiv.innerText = '✓';
                     if(riwayat && riwayat[i] !== "") {
                         tglBadge.innerText = `Selesai: ${riwayat[i].split(',')[0]}`; tglBadge.classList.remove('hide'); tglBadge.style.backgroundColor = '#e9ecef'; tglBadge.style.color = '#495057';
                     }
                 } else if (i === currentStep) {
-                    // Tahapan saat ini
                     if (currentStep === 4) {
-                        // JIKA STATUS SELESAI -> LANGSUNG CENTANG HIJAU
                         iconDiv.className = 'step-icon icon-done'; iconDiv.innerText = '✓';
                     } else {
-                        // LAINNYA -> BIRU AKTIF
                         iconDiv.className = 'step-icon icon-active'; textTitle.classList.add('text-active');
                     }
                     
@@ -177,15 +179,14 @@
                     iconDiv.className = 'step-icon icon-pending'; textTitle.classList.add('text-pending');
                 }
 
-                // TAMPILKAN SLA DENGAN SYARAT (Tidak muncul jika isPendingSLA)
-                if (i === 2 && (currentStep === 2 || currentStep === 3) && riwayat.tgl_bayar_ts && !isPendingSLA) {
+                // TAMPILKAN SLA HANYA JIKA TIDAK PENDING MELEWATI 14 HARI DAN TIDAK TERTUNDA
+                if (i === 2 && (currentStep === 2 || currentStep === 3) && riwayat.tgl_bayar_ts && !isPendingSLA && !isTertunda) {
                     let hariKe = hitungHariKerja(riwayat.tgl_bayar_ts);
                     document.getElementById('sla-tgl-max').innerText = maxSlaDateStr;
                     document.getElementById('sla-text').innerText = `Hari ke-${hariKe}`;
                     document.getElementById('sla-badge').classList.remove('hide');
                 }
 
-                // PANEL SUB-PEMASANGAN
                 if (i === 3 && (currentStep === 3 || currentStep === 4)) {
                     if (riwayat.detail_pemasangan) {
                         let det = riwayat.detail_pemasangan;
@@ -213,7 +214,6 @@
                                 t3.innerHTML = `❌ Pemasangan di lokasi`;
                                 txt3.innerHTML = `<span class="text-danger fw-bold">[Gagal]</span> ${det.kategori}.<br/><i>Catatan: ${det.catatan}</i>`;
                                 
-                                // TIMPA WARNA HIJAU/BIRU DI TAHAP 4 MENJADI MERAH TOTAL
                                 let s4Title = document.querySelector('#step-4 h6');
                                 s4Title.innerHTML = `<span class="text-danger fw-bold">❌ Gagal Melakukan Pemasangan</span>`;
                                 let s4Icon = document.querySelector('#step-4 .step-icon');
