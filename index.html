@@ -14,9 +14,9 @@
         .sidebar { position: fixed; top: 0; left: 0; width: 240px; height: 100vh; background: #ffffff; border-right: 1px solid #e2e8f0; z-index: 1000; padding: 20px; display: flex; flex-direction: column; transition: transform 0.3s ease; }
         .sidebar.collapsed { transform: translateX(-240px); }
         
-        /* LOGO DIPERBESAR DAN POSISI DI TENGAH */
+        /* LOGO SIDEBAR */
         .sidebar-brand { text-align: center; margin-bottom: 30px; padding: 0; }
-        .sidebar-brand img { max-height: 70px; width: auto; object-fit: contain; display: inline-block; }
+        .sidebar-brand img { max-height: 65px; width: auto; object-fit: contain; display: inline-block; }
 
         .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .sidebar-menu li a { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #64748b; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 0.9rem; transition: 0.2s; }
@@ -50,11 +50,11 @@
         
         .table { margin-bottom: 0; }
         .table thead th { background-color: #f8fafc; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; border-bottom: 1px solid #e2e8f0; padding: 1rem; border-top: none; text-align: center; }
-        .table tbody td { padding: 1rem; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: middle; font-size: 0.875rem; }
+        .table tbody td { padding: 0.85rem 1rem; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: middle; font-size: 0.875rem; }
         .table tbody tr:hover { background-color: #f8fafc; }
         
         /* PERAPIAN DROPDOWN STATUS AGAR TIDAK TERTUTUP PANAH */
-        .table select.form-select { padding-right: 32px !important; text-overflow: ellipsis; }
+        .table select.form-select { padding-right: 30px !important; text-overflow: ellipsis; font-size: 0.8rem; }
 
         .form-label { font-weight: 600; color: #475569; margin-bottom: 0.25rem; font-size: 0.8rem; }
         .form-control, .form-select { border-color: #cbd5e1; border-radius: 8px; box-shadow: none; font-size: 0.875rem; padding: 0.5rem 0.75rem; }
@@ -62,6 +62,23 @@
         .btn { border-radius: 8px; font-weight: 500; font-size: 0.875rem; padding: 0.5rem 1rem; }
         
         .btn-tambah { display: flex; align-items: center; justify-content: center; height: 38px; width: 100%; font-weight: 600; }
+
+        /* DESAIN TOMBOL AKSI MINIMALIS DENGAN GAMBAR PNG */
+        .btn-action-custom {
+            padding: 4px 8px !important;
+            font-size: 0.75rem !important;
+            font-weight: 600;
+            border-radius: 6px !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .btn-action-custom img {
+            width: 13px;
+            height: 13px;
+            object-fit: contain;
+        }
 
         .badge-sla { font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; font-weight: 600;}
         .bg-soft-warning { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a;}
@@ -179,7 +196,7 @@
                             <th>SLA Pasang</th>
                             <th>Pelanggan</th>
                             <th style="min-width: 170px;">Status</th>
-                            <th class="text-end pe-3" style="min-width: 220px;">Aksi</th>
+                            <th class="text-end pe-3" style="min-width: 200px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="tabel-pelanggan"></tbody>
@@ -497,12 +514,20 @@
                 </td>
                 <td class="text-end pe-3">
                     <div class="d-flex flex-column align-items-end gap-1">
-                        <div class="btn-group btn-group-sm w-100" style="max-width: 190px;">
-                            <button class="btn btn-outline-secondary" onclick="bukaModalEdit('${row.id}')">✏️ Edit</button>
-                            <button class="btn btn-outline-danger" onclick="hapusPelanggan('${row.id}')">🗑️ Hapus</button>
-                            <a href="${linkTracker}" target="_blank" class="btn btn-outline-primary">🔗 Link</a>
+                        <div class="btn-group btn-group-sm w-100" style="max-width: 175px;">
+                            <button class="btn btn-outline-secondary btn-action-custom" onclick="bukaModalEdit('${row.id}')">
+                                <img src="pencil.png" alt="Edit"> Edit
+                            </button>
+                            <button class="btn btn-outline-danger btn-action-custom" onclick="hapusPelanggan('${row.id}')">
+                                <img src="trash.png" alt="Hapus"> Hapus
+                            </button>
+                            <a href="${linkTracker}" target="_blank" class="btn btn-outline-primary btn-action-custom">
+                                <img src="link.png" alt="Link"> Link
+                            </a>
                         </div>
-                        <button class="btn btn-sm text-white fw-bold w-100" style="max-width: 190px; background-color: #0d9488;" onclick="kirimWA('${row.id}', '${linkTracker}')">💬 Kirim WA</button>
+                        <button class="btn btn-sm text-white btn-action-custom w-100" style="max-width: 175px; background-color: #0d9488;" onclick="kirimWA('${row.id}', '${linkTracker}')">
+                            <img src="whatsapp.png" alt="WA"> Kirim WA
+                        </button>
                     </div>
                 </td>
             `;
