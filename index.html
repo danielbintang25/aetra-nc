@@ -403,6 +403,20 @@
     }
 
     function renderTabel() {
+        // 1. UPDATE KPI CARDS (SELALU MENGGUNAKAN DBPELANGGAN/TOTAL KESELURUHAN DATA)
+        let selesaiSemua = dbPelanggan.filter(p => p.status === "Selesai");
+        let totalSelesai = selesaiSemua.length;
+        let totalGagal = selesaiSemua.filter(p => p.riwayat_tgl && p.riwayat_tgl.detail_pemasangan && p.riwayat_tgl.detail_pemasangan.kondisi === "Gagal").length;
+        let totalSukses = totalSelesai - totalGagal;
+
+        document.getElementById("kpi-total").innerText = dbPelanggan.length;
+        document.getElementById("kpi-bayar").innerText = dbPelanggan.filter(p => p.status === "Pembayaran Diterima").length;
+        document.getElementById("kpi-proses").innerText = dbPelanggan.filter(p => p.status === "Proses Pemasangan").length; 
+        document.getElementById("kpi-selesai").innerText = totalSelesai;
+        document.getElementById("kpi-sukses").innerText = totalSukses;
+        document.getElementById("kpi-gagal").innerText = totalGagal;
+
+        // 2. FILTER & SORTING HANYA UNTUK TAMPILAN TABEL
         const tbody = document.getElementById("tabel-pelanggan"); tbody.innerHTML = ""; 
         let fStatus = document.getElementById("filterStatus").value; 
         let fBulan = document.getElementById("filterBulan").value; 
@@ -418,18 +432,6 @@
             let passSearch = (p.id.toLowerCase().includes(searchQ) || p.nama.toLowerCase().includes(searchQ));
             return passStatus && passBulan && passTahun && passSearch;
         });
-
-        let selesaiData = dataTampil.filter(p => p.status === "Selesai");
-        let totalSelesai = selesaiData.length;
-        let totalGagal = selesaiData.filter(p => p.riwayat_tgl && p.riwayat_tgl.detail_pemasangan && p.riwayat_tgl.detail_pemasangan.kondisi === "Gagal").length;
-        let totalSukses = totalSelesai - totalGagal;
-
-        document.getElementById("kpi-total").innerText = dataTampil.length;
-        document.getElementById("kpi-bayar").innerText = dataTampil.filter(p => p.status === "Pembayaran Diterima").length;
-        document.getElementById("kpi-proses").innerText = dataTampil.filter(p => p.status === "Proses Pemasangan").length; 
-        document.getElementById("kpi-selesai").innerText = totalSelesai;
-        document.getElementById("kpi-sukses").innerText = totalSukses;
-        document.getElementById("kpi-gagal").innerText = totalGagal;
 
         dataTampil.sort((a, b) => fSort === "baru" ? (b.tgl_buat - a.tgl_buat) : (a.tgl_buat - b.tgl_buat));
 
