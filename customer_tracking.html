@@ -40,19 +40,18 @@
     <div class="header-app"><h5 class="mb-0">Aetra Live Tracking</h5><small id="display-info">No. Form: Memuat... | Memuat...</small></div>
     <div class="p-4">
         <h6 class="fw-bold mb-4 text-center">Riwayat & Status Pemasangan</h6>
-        
+
         <div class="step" id="step-1"><div class="step-icon">1</div><h6 class="mb-1">Pendaftaran Diterima</h6><span id="tgl-1" class="tgl-badge hide"></span></div>
-        
+
         <div class="step" id="step-2">
             <div class="step-icon">2</div><h6 class="mb-1">Pembayaran Diterima</h6>
             <span id="tgl-2" class="tgl-badge hide" style="display:block; width:fit-content;"></span>
-            
-            <!-- Teks "Hari ke-" DIHAPUS, hanya menyisakan batas maksimal tanggal -->
+
             <div id="sla-badge" class="sla-badge hide">
                 ⏱️ <strong>Batas maksimal pemasangan: <span id="sla-tgl-max"></span></strong>
             </div>
         </div>
-        
+
         <div class="step" id="step-3">
             <div class="step-icon">3</div><h6 class="mb-1">Proses Pemasangan</h6>
             <span id="tgl-3" class="tgl-badge hide" style="display:block; width:fit-content;"></span>
@@ -77,7 +76,6 @@
 
         <div class="mt-5 text-center border-top pt-4">
             <p class="small text-muted mb-2">Butuh bantuan atau informasi lebih lanjut?</p>
-            <!-- NOMOR CS DIUBAH MENJADI 087788224645 -->
             <a href="https://wa.me/6287788224645" class="btn btn-cs w-100 fw-bold shadow-sm" target="_blank">💬 Hubungi CS Aetra</a>
         </div>
     </div>
@@ -119,8 +117,8 @@
             let maxSlaDateStr = "";
             let isPendingSLA = false;
             let isTertunda = false;
-            
-            if (riwayat.tgl_bayar_ts) {
+
+            if (riwayat && riwayat.tgl_bayar_ts) {
                 let start = new Date(riwayat.tgl_bayar_ts);
                 let added = 0;
                 while(added < 14) {
@@ -128,13 +126,13 @@
                     if(start.getDay() !== 0 && start.getDay() !== 6) added++;
                 }
                 maxSlaDateStr = formatTanggal(start.toISOString().split('T')[0]);
-                
+
                 start.setHours(23, 59, 59, 999);
                 if (riwayat.detail_pemasangan && riwayat.detail_pemasangan.jadwal) {
                     let jadwalDate = new Date(riwayat.detail_pemasangan.jadwal);
                     if (jadwalDate > start) isPendingSLA = true;
                 }
-                
+
                 if (riwayat.detail_pemasangan && riwayat.detail_pemasangan.kondisi === "Tertunda") {
                     isTertunda = true;
                 }
@@ -159,7 +157,7 @@
                     } else {
                         iconDiv.className = 'step-icon icon-active'; textTitle.classList.add('text-active');
                     }
-                    
+
                     if(riwayat && riwayat[i] !== "") {
                         tglBadge.innerText = `Diperbarui: ${riwayat[i].split(',')[0]}`; tglBadge.classList.remove('hide'); tglBadge.style.backgroundColor = '#cfe2ff'; tglBadge.style.color = '#0a58ca';
                     }
@@ -167,29 +165,28 @@
                     iconDiv.className = 'step-icon icon-pending'; textTitle.classList.add('text-pending');
                 }
 
-                // TAMPILKAN BATAS MAKSIMAL PEMASANGAN TANPA TEKS HARI KE-
-                if (i === 2 && (currentStep === 2 || currentStep === 3) && riwayat.tgl_bayar_ts && !isPendingSLA && !isTertunda) {
+                if (i === 2 && (currentStep === 2 || currentStep === 3) && riwayat && riwayat.tgl_bayar_ts && !isPendingSLA && !isTertunda) {
                     document.getElementById('sla-tgl-max').innerText = maxSlaDateStr;
                     document.getElementById('sla-badge').classList.remove('hide');
                 }
 
                 if (i === 3 && (currentStep === 3 || currentStep === 4)) {
-                    if (riwayat.detail_pemasangan) {
+                    if (riwayat && riwayat.detail_pemasangan) {
                         let det = riwayat.detail_pemasangan;
                         document.getElementById('sub-step-container').classList.remove('hide');
-                        
+
                         if (det.tgl_so) document.getElementById('sub-1').classList.remove('hide');
                         if (det.jadwal) { 
                             document.getElementById('sub-2').classList.remove('hide'); 
                             document.getElementById('text-jadwal').innerText = formatTanggal(det.jadwal); 
                         }
-                        
+
                         if (det.kondisi) {
                             document.getElementById('title-sub2').classList.remove('text-primary');
                             document.getElementById('sub-3').classList.remove('hide');
                             let t3 = document.getElementById('title-kendala');
                             let txt3 = document.getElementById('text-kendala');
-                            
+
                             if (det.kondisi === "Sukses") {
                                 t3.innerHTML = `✅ Pemasangan di lokasi`;
                                 txt3.innerHTML = `<span class="text-success fw-bold">[Sukses]</span> Pemasangan telah selesai dilakukan.`;
@@ -198,8 +195,8 @@
 
                             } else if (det.kondisi === "Gagal") {
                                 t3.innerHTML = `❌ Pemasangan di lokasi`;
-                                txt3.innerHTML = `<span class="text-danger fw-bold">[Gagal]</span> ${det.kategori}.<br/><i>Catatan: ${det.catatan}</i>`;
-                                
+                                txt3.innerHTML = `<span class="text-danger fw-bold">[Gagal]</span> ${det.kategori ? det.kategori + '.' : ''}<br/><i>Catatan: ${det.catatan || '-'}</i>`;
+
                                 let s4Title = document.querySelector('#step-4 h6');
                                 s4Title.innerHTML = `<span class="text-danger fw-bold">❌ Gagal Melakukan Pemasangan</span>`;
                                 let s4Icon = document.querySelector('#step-4 .step-icon');
@@ -209,7 +206,7 @@
                             } else {
                                 let tambahan = det.tgl_kembali ? `<br/><span class="text-info fw-bold">📅 Dijadwalkan Ulang: ${formatTanggal(det.tgl_kembali)}</span>` : "";
                                 t3.innerHTML = `⚠️ Pemasangan di lokasi`;
-                                txt3.innerHTML = `<span class="text-warning fw-bold" style="color:#d39e00 !important;">[Tertunda]</span> ${det.kategori}.<br/><i>Catatan: ${det.catatan}</i>${tambahan}`;
+                                txt3.innerHTML = `<span class="text-warning fw-bold" style="color:#d39e00 !important;">[Tertunda]</span> ${det.kategori ? det.kategori + '.' : ''}<br/><i>Catatan: ${det.catatan || '-'}</i>${tambahan}`;
                             }
                         }
                     }
