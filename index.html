@@ -251,9 +251,9 @@
             <label class="form-label small">Kondisi Lapangan</label>
             <select id="pm_kondisi" class="form-select form-select-sm border-warning" onchange="toggleKendala()">
                 <option value="">-- Belum Ada Laporan --</option>
-                <option value="Sukses">✅ Berjalan Lancar / Sukses</option>
-                <option value="Tertunda">⏳ Tertunda (Pending)</option>
-                <option value="Gagal">❌ Gagal / Batal</option>
+                <option value="Sukses">✅ Sukses</option>
+                <option value="Tertunda">⏳ Tertunda</option>
+                <option value="Gagal">❌ Gagal</option>
             </select>
         </div>
         <div id="boxKendala" class="hide p-3 bg-light rounded" style="border: 1px dashed #cbd5e1;">
@@ -280,7 +280,7 @@
 <script>
     // ===================================================================
     const SUPABASE_URL = 'https://vyngziqwsdhetapjzlgr.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5bmd6aXF3c2RoZXRhcGp6bGdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4ODE0ODIsImV4cCI6MjEwMjQ1NzQ4Mn0._uJcP6YPkXH6mQmIHW-vrKOZIguHGKI_72zEWYei24s'; 
+    const SUPABASE_KEY = 'MASUKKAN_ANON_KEY_ANDA_DISINI'; 
     // ===================================================================
 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
