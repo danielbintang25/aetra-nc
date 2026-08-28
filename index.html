@@ -10,11 +10,9 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { background-color: #f4f6f9; font-family: 'Inter', sans-serif; color: #1e293b; margin: 0; overflow-x: hidden; }
         
-        /* SIDEBAR MENU DENGAN ANIMASI TOGGLE (DEFAULT COLLAPSED) */
         .sidebar { position: fixed; top: 0; left: 0; width: 240px; height: 100vh; background: #ffffff; border-right: 1px solid #e2e8f0; z-index: 1000; padding: 20px; display: flex; flex-direction: column; transition: transform 0.3s ease; }
         .sidebar.collapsed { transform: translateX(-240px); }
         
-        /* LOGO SIDEBAR */
         .sidebar-brand { text-align: center; margin-bottom: 30px; padding: 0; }
         .sidebar-brand img { max-height: 65px; width: auto; object-fit: contain; display: inline-block; }
 
@@ -22,7 +20,6 @@
         .sidebar-menu li a { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #64748b; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 0.9rem; transition: 0.2s; }
         .sidebar-menu li.active a { background-color: #eff6ff; color: #2563eb; }
 
-        /* MAIN WRAPPER (DEFAULT EXPANDED) */
         .main-wrapper { margin-left: 0; min-height: 100vh; display: flex; flex-direction: column; transition: margin-left 0.3s ease; }
         .main-wrapper:not(.expanded) { margin-left: 240px; }
 
@@ -32,7 +29,6 @@
         .hide { display: none !important; }
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255,255,255,0.9); z-index: 9998; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px; color: #3b82f6;}
         
-        /* KPI CARDS */
         .kpi-card { border: none; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); padding: 1.5rem; transition: transform 0.2s; height: 100%; border-left: 4px solid transparent; }
         .kpi-card:hover { transform: translateY(-3px); }
         .kpi-card-blue { border-left-color: #3b82f6; }
@@ -53,7 +49,6 @@
         .table tbody td { padding: 0.85rem 1rem; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: middle; font-size: 0.875rem; }
         .table tbody tr:hover { background-color: #f8fafc; }
         
-        /* PERAPIAN DROPDOWN STATUS AGAR TIDAK TERTUTUP PANAH */
         .table select.form-select { padding-right: 30px !important; text-overflow: ellipsis; font-size: 0.8rem; }
 
         .form-label { font-weight: 600; color: #475569; margin-bottom: 0.25rem; font-size: 0.8rem; }
@@ -63,7 +58,6 @@
         
         .btn-tambah { display: flex; align-items: center; justify-content: center; height: 38px; width: 100%; font-weight: 600; }
 
-        /* DESAIN TOMBOL AKSI MINIMALIS DENGAN GAMBAR PNG */
         .btn-action-custom {
             padding: 4px 8px !important;
             font-size: 0.75rem !important;
@@ -74,11 +68,7 @@
             justify-content: center;
             gap: 4px;
         }
-        .btn-action-custom img {
-            width: 13px;
-            height: 13px;
-            object-fit: contain;
-        }
+        .btn-action-custom img { width: 13px; height: 13px; object-fit: contain; }
 
         .badge-sla { font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; font-weight: 600;}
         .bg-soft-warning { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a;}
@@ -110,7 +100,6 @@
     </div>
 </div>
 
-<!-- SIDEBAR MENU UTAMA (DEFAULT COLLAPSED/TERTUTUP) -->
 <div class="sidebar collapsed" id="appSidebar">
     <div class="sidebar-brand">
         <img src="logo.jpg" alt="Aetra Logo">
@@ -120,11 +109,9 @@
     </ul>
 </div>
 
-<!-- MAIN CONTENT WRAPPER (DEFAULT EXPANDED) -->
 <div class="main-wrapper expanded" id="mainWrapper">
     <div class="top-header">
         <div class="d-flex align-items-center gap-3">
-            <!-- TOMBOL HAMBURGER TOGGLE SIDEBAR -->
             <button class="btn btn-sm text-white fs-5 border-0 p-0 shadow-none" onclick="toggleSidebar()" title="Tutup/Buka Menu">☰</button>
             <h5 class="m-0 fw-bold fs-6">Aetra Smart Connect</h5>
         </div>
@@ -132,7 +119,6 @@
     </div>
 
     <div class="container-fluid main-container">
-        <!-- KPI CARDS -->
         <div class="row g-4 mb-4">
             <div class="col-md-3">
                 <div class="kpi-card kpi-card-blue">
@@ -191,7 +177,7 @@
                             <th style="width: 50px;">No.</th>
                             <th>No. Form</th>
                             <th>Tgl Masuk</th>
-                            <th>Tgl Bayar</th>
+                            <th style="min-width: 150px;">Tgl Bayar</th>
                             <th>Tgl Pasang</th>
                             <th>SLA Pasang</th>
                             <th>Pelanggan</th>
@@ -203,7 +189,6 @@
                 </table>
             </div>
 
-            <!-- PAGINATION CONTROLS (MAX 10 PER HALAMAN) -->
             <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
                 <div class="d-flex align-items-center gap-2">
                     <span class="small text-muted">Tampilkan</span>
@@ -292,7 +277,6 @@
     let currentPage = 1;
     let pageSize = 10;
 
-    // FUNGSI TOGGLE SIDEBAR BUKA/TUTUP
     function toggleSidebar() {
         const sidebar = document.getElementById('appSidebar');
         const mainWrapper = document.getElementById('mainWrapper');
@@ -352,7 +336,18 @@
         if(!tglStr) return "-";
         const bln = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Ags","Sep","Okt","Nov","Des"];
         let d = new Date(tglStr);
+        if (isNaN(d.getTime())) return tglStr;
         return `${d.getDate()} ${bln[d.getMonth()]} ${d.getFullYear()}`;
+    }
+
+    function getIsoDateFromTs(ts) {
+        if(!ts) return "";
+        let d = new Date(ts);
+        if (isNaN(d.getTime())) return "";
+        let year = d.getFullYear();
+        let month = String(d.getMonth() + 1).padStart(2, '0');
+        let day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 
     function hitungHariKerja(startDateTs) {
@@ -403,7 +398,6 @@
     }
 
     function renderTabel() {
-        // 1. UPDATE KPI CARDS (SELALU MENGGUNAKAN DBPELANGGAN/TOTAL KESELURUHAN DATA)
         let selesaiSemua = dbPelanggan.filter(p => p.status === "Selesai");
         let totalSelesai = selesaiSemua.length;
         let totalGagal = selesaiSemua.filter(p => p.riwayat_tgl && p.riwayat_tgl.detail_pemasangan && p.riwayat_tgl.detail_pemasangan.kondisi === "Gagal").length;
@@ -416,7 +410,6 @@
         document.getElementById("kpi-sukses").innerText = totalSukses;
         document.getElementById("kpi-gagal").innerText = totalGagal;
 
-        // 2. FILTER & SORTING HANYA UNTUK TAMPILAN TABEL
         const tbody = document.getElementById("tabel-pelanggan"); tbody.innerHTML = ""; 
         let fStatus = document.getElementById("filterStatus").value; 
         let fBulan = document.getElementById("filterBulan").value; 
@@ -435,7 +428,6 @@
 
         dataTampil.sort((a, b) => fSort === "baru" ? (b.tgl_buat - a.tgl_buat) : (a.tgl_buat - b.tgl_buat));
 
-        // PAGINATION LOGIC
         let totalData = dataTampil.length;
         let totalPages = Math.ceil(totalData / pageSize) || 1;
         if (currentPage > totalPages) currentPage = totalPages;
@@ -444,9 +436,20 @@
 
         let nomorUrut = startIndex + 1;
         paginatedData.forEach((row) => {
-            let tglMasuk = row.riwayat_tgl && row.riwayat_tgl["1"] ? row.riwayat_tgl["1"].split(',')[0] : "-";
-            let tglBayar = row.riwayat_tgl && row.riwayat_tgl["2"] ? row.riwayat_tgl["2"].split(',')[0] : "-";
+            // PERTAHANKAN TANGGAL MASUK DARI TGL_BUAT PERTAMA KALI
+            let tglMasuk = row.riwayat_tgl && row.riwayat_tgl["1"] ? row.riwayat_tgl["1"].split(',')[0] : formatTanggal(new Date(row.tgl_buat).toISOString());
+
+            // KALENDER PILIH TANGGAL PEMBAYARAN MANUAL
+            let tglBayarHtml = "-";
+            if (row.riwayat_tgl && row.riwayat_tgl.tgl_bayar_ts) {
+                let isoVal = getIsoDateFromTs(row.riwayat_tgl.tgl_bayar_ts);
+                tglBayarHtml = `<input type="date" class="form-control form-control-sm text-success fw-bold shadow-sm" value="${isoVal}" onchange="updateTglBayar('${row.id}', this.value)" style="width: 135px; font-size: 0.8rem; margin: 0 auto; padding: 2px 6px; border: 1px solid #86efac;">`;
+            } else if (row.status !== "Pendaftaran Diterima") {
+                let isoToday = getIsoDateFromTs(Date.now());
+                tglBayarHtml = `<input type="date" class="form-control form-control-sm text-muted" value="${isoToday}" onchange="updateTglBayar('${row.id}', this.value)" style="width: 135px; font-size: 0.8rem; margin: 0 auto; padding: 2px 6px;">`;
+            }
             
+            // PERHITUNGAN DINAMIS BATAS SLA DARI TGL_BAYAR_TS
             let maxSlaDateStr = "-";
             if (row.riwayat_tgl && row.riwayat_tgl.tgl_bayar_ts) {
                 let start = new Date(row.riwayat_tgl.tgl_bayar_ts);
@@ -498,7 +501,7 @@
                 <td class="fw-bold text-center text-muted">${nomorUrut++}</td>
                 <td class="fw-bold text-center" style="color:#3b82f6;">${row.id}</td>
                 <td class="text-center">${tglMasuk}</td>
-                <td class="fw-medium text-center text-success">${tglBayar}</td>
+                <td class="text-center">${tglBayarHtml}</td>
                 <td class="text-center">${tglPasang}</td>
                 <td class="text-center">${slaHtml}</td>
                 <td>
@@ -536,7 +539,6 @@
             tbody.appendChild(tr);
         });
 
-        // RENDER PAGINATION BUTTONS
         let pagContainer = document.getElementById("paginationContainer");
         pagContainer.innerHTML = `
             <button class="btn btn-outline-secondary" onclick="gantiHalaman(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>&lt;</button>
@@ -566,20 +568,53 @@
         modalInstance.hide(); fetchDatabase(); 
     }
 
+    // UPDATE TANGGAL PEMBAYARAN MANUAL LEWAT KALENDER TABLE & OTOMATIS HITUNG ULANG SLA
+    async function updateTglBayar(id, newDateISO) {
+        if (!newDateISO) return;
+        document.getElementById('loading-overlay').classList.remove('hide');
+        let index = findIndexById(id);
+        let riwayatBaru = dbPelanggan[index].riwayat_tgl || {};
+        
+        let selectedDate = new Date(newDateISO + "T12:00:00");
+        riwayatBaru["tgl_bayar_ts"] = selectedDate.getTime();
+        
+        const bln = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Ags","Sep","Okt","Nov","Des"];
+        let jam = new Date().getHours().toString().padStart(2, '0');
+        let mnt = new Date().getMinutes().toString().padStart(2, '0');
+        riwayatBaru["2"] = `${selectedDate.getDate()} ${bln[selectedDate.getMonth()]} ${selectedDate.getFullYear()}, ${jam}:${mnt} WIB`;
+
+        const { error } = await _supabase.from('pelanggan').update({ riwayat_tgl: riwayatBaru }).eq('id', id);
+        if (error) { alert("Gagal memperbarui tanggal pembayaran!"); }
+        fetchDatabase();
+    }
+
+    // UPDATE STATUS DENGAN PROTEKSI PERTAHANKAN TANGGAL MASUK PERTAMA
     async function updateStatus(id, statusBaru) {
         document.getElementById('loading-overlay').classList.remove('hide');
         let index = findIndexById(id);
-        let riwayatBaru = dbPelanggan[index].riwayat_tgl || {"1": "", "2": "", "3": "", "4": ""};
+        let riwayatBaru = dbPelanggan[index].riwayat_tgl || {};
+        
+        // Tetapkan Tgl Masuk jika belum ada, jagan ubah jika sudah ada
+        if (!riwayatBaru["1"]) {
+            riwayatBaru["1"] = getTanggalSekarang();
+        }
+
         const statusMap = { "Pendaftaran Diterima": 1, "Pembayaran Diterima": 2, "Proses Pemasangan": 3, "Selesai": 4 };
         let stepAktif = statusMap[statusBaru];
         
-        riwayatBaru[stepAktif.toString()] = getTanggalSekarang();
-        for (let i = stepAktif + 1; i <= 4; i++) { riwayatBaru[i.toString()] = ""; }
+        if (stepAktif > 1) {
+            riwayatBaru[stepAktif.toString()] = getTanggalSekarang();
+        }
+
+        for (let i = stepAktif + 1; i <= 4; i++) { 
+            riwayatBaru[i.toString()] = ""; 
+        }
 
         if (stepAktif < 3) { delete riwayatBaru.detail_pemasangan; }
-        if (stepAktif < 2) { delete riwayatBaru["tgl_bayar_ts"]; }
-
-        if ((statusBaru === "Pembayaran Diterima" || statusBaru === "Proses Pemasangan") && !riwayatBaru["tgl_bayar_ts"]) {
+        
+        if (stepAktif < 2) { 
+            delete riwayatBaru["tgl_bayar_ts"]; 
+        } else if (!riwayatBaru["tgl_bayar_ts"]) {
             riwayatBaru["tgl_bayar_ts"] = Date.now();
         }
 
@@ -643,7 +678,6 @@
         }
     }
 
-    // FUNGSI WHATSAPP DENGAN NO. FORM BOLD & TANPA IKON STATUS
     function kirimWA(id, linkPintar) {
         let p = dbPelanggan[findIndexById(id)];
         let noHP = p.telepon.startsWith('0') ? '62' + p.telepon.substring(1) : p.telepon;
