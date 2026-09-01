@@ -12,7 +12,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { background-color: #f4f6f9; font-family: 'Inter', sans-serif; color: #1e293b; margin: 0; overflow-x: hidden; }
         
-        /* SIDEBAR STYLES */
         .sidebar { position: fixed; top: 0; left: 0; width: 240px; height: 100vh; background: #ffffff; border-right: 1px solid #e2e8f0; z-index: 1000; padding: 20px; display: flex; flex-direction: column; transition: transform 0.3s ease; }
         .sidebar.collapsed { transform: translateX(-240px); }
         
@@ -26,7 +25,6 @@
 
         .sidebar-footer { margin-top: auto; padding-top: 15px; border-top: 1px solid #f1f5f9; }
 
-        /* MAIN WRAPPER STYLES */
         .main-wrapper { margin-left: 0; min-height: 100vh; display: flex; flex-direction: column; transition: margin-left 0.3s ease; }
         .main-wrapper:not(.expanded) { margin-left: 240px; }
 
@@ -36,7 +34,6 @@
         .hide { display: none !important; }
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255,255,255,0.9); z-index: 9998; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px; color: #3b82f6;}
         
-        /* KPI CARDS */
         .kpi-card { border: none; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); padding: 1.5rem; transition: transform 0.2s; height: 100%; border-left: 4px solid transparent; }
         .kpi-card:hover { transform: translateY(-3px); }
         .kpi-card-blue { border-left-color: #3b82f6; }
@@ -117,6 +114,7 @@
     </div>
 </div>
 
+<!-- SIDEBAR MENU -->
 <div class="sidebar collapsed" id="appSidebar">
     <div>
         <div class="sidebar-brand">
@@ -135,6 +133,7 @@
     </div>
 </div>
 
+<!-- MAIN WRAPPER -->
 <div class="main-wrapper expanded" id="mainWrapper">
     <div class="top-header">
         <div class="d-flex align-items-center gap-3">
@@ -143,6 +142,7 @@
         </div>
     </div>
 
+    <!-- VIEW 1: DASHBOARD UTAMA -->
     <div id="viewDashboard" class="container-fluid main-container">
         <div class="row g-4 mb-4">
             <div class="col-md-3">
@@ -232,6 +232,7 @@
         </div>
     </div>
 
+    <!-- VIEW 2: HALAMAN LAPORAN BULANAN (TAMPILAN FULL DENGAN DIAGRAM) -->
     <div id="viewLaporan" class="container-fluid main-container hide">
         <div id="areaCetakHalaman">
             <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
@@ -316,6 +317,7 @@
     </div>
 </div>
 
+<!-- MODAL FORM TAMBAH / EDIT -->
 <div class="modal fade" id="modalForm" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -331,6 +333,7 @@
   </div>
 </div>
 
+<!-- MODAL DETAIL PEMASANGAN -->
 <div class="modal fade" id="modalPemasangan" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -357,10 +360,16 @@
                 <label class="form-label small text-danger">Kategori Kendala</label>
                 <select id="pm_kategori" class="form-select form-select-sm">
                     <option value="">-- Pilih Kategori --</option>
-                    <option value="Menunggu konfirmasi akses lokasi dari pelanggan">Menunggu akses lokasi pelanggan</option>
-                    <option value="Kendala teknis di lapangan (cuaca / material)">Kendala teknis (cuaca/material)</option>
-                    <option value="Penjadwalan ulang sesuai permintaan pelanggan">Permintaan jadwal ulang</option>
-                    <option value="Lainnya, hubungi CS">Lainnya (Hubungi CS)</option>
+                    <option value="Pelanggan tidak ada di lokasi / rumah terkunci">Pelanggan tidak di lokasi / rumah terkunci</option>
+                    <option value="Izin galian belum disetujui (RT/RW/Developer/PUPR)">Izin galian belum disetujui (RT/RW/Developer/PUPR)</option>
+                    <option value="Kendala teknis di lapangan (cuaca / material)">Kendala teknis di lapangan (cuaca / material)</option>
+                    <option value="Membutuhkan perpanjangan jaringan pipa utama">Membutuhkan perpanjangan jaringan pipa utama</option>
+                    <option value="Terhalang utilitas lain di bawah tanah (PLN/Gas/Telkom)">Terhalang utilitas lain (PLN/Gas/Telkom)</option>
+                    <option value="Instalasi pipa dalam rumah belum siap">Instalasi pipa persil pelanggan belum siap</option>
+                    <option value="Penjadwalan ulang sesuai permintaan pelanggan">Penjadwalan ulang sesuai permintaan pelanggan</option>
+                    <option value="Alamat atau titik lokasi tidak sesuai">Alamat atau titik lokasi tidak sesuai</option>
+                    <option value="Pelanggan mengajukan pembatalan">Pelanggan mengajukan pembatalan</option>
+                    <option value="Lainnya">Lainnya</option>
                 </select>
             </div>
             <div id="boxJadwalUlang" class="mb-2 hide"><label class="form-label small text-info">Tanggal Janji/Jadwal Ulang</label><input type="date" id="pm_tgl_kembali" class="form-control form-control-sm"></div>
@@ -389,7 +398,6 @@
     let pageSize = 10;
     let filteredDataTerakhir = [];
 
-    // Chart instances untuk dihancurkan sebelum dirender ulang
     let chartStatusInstance = null;
     let chartSlaInstance = null;
     let chartKendalaInstance = null;
@@ -401,7 +409,6 @@
         mainWrapper.classList.toggle('expanded');
     }
 
-    // FUNGSI PERGANTIAN HALAMAN (SIDE TAB VIEW SWITCHING)
     function switchView(viewName) {
         document.getElementById('navDashboard').classList.remove('active');
         document.getElementById('navLaporan').classList.remove('active');
@@ -415,7 +422,6 @@
             document.getElementById('viewDashboard').classList.add('hide');
             document.getElementById('viewLaporan').classList.remove('hide');
             
-            // Atur default bulan & tahun ke saat ini
             let d = new Date();
             document.getElementById("repBulan").value = d.getMonth().toString();
             document.getElementById("repTahun").value = d.getFullYear().toString();
@@ -724,7 +730,6 @@
         XLSX.writeFile(workbook, `Laporan_Pelanggan_Aetra_${tglStr}.xlsx`);
     }
 
-    // PENGERJAAN REKAP & DIAGRAM VISUAL HALAMAN LAPORAN
     function generateRekapBulanan() {
         let blnSelected = document.getElementById("repBulan").value;
         let thnSelected = document.getElementById("repTahun").value;
@@ -765,7 +770,6 @@
         document.getElementById("repSuccessRate").innerText = `${successRate}%`;
         document.getElementById("repSuksesGagalRatio").innerText = `${totalSukses} Sukses / ${totalGagal} Gagal`;
 
-        // AMBIL DISTRIBUSI KENDALA
         let kendalaCounts = {};
         dataBulan.forEach(p => {
             if (p.riwayat_tgl && p.riwayat_tgl.detail_pemasangan && p.riwayat_tgl.detail_pemasangan.kategori) {
@@ -774,12 +778,10 @@
             }
         });
 
-        // RENDER 3 DIAGRAM VISUAL (CHART.JS)
         renderDiagrams(totalSukses, totalGagal, totalProses, totalSlaTepat, totalSlaLewat, kendalaCounts);
     }
 
     function renderDiagrams(sukses, gagal, proses, slaTepat, slaLewat, kendalaCounts) {
-        // 1. Chart Status Pemasangan (Doughnut)
         const ctx1 = document.getElementById('chartStatusCanvas').getContext('2d');
         if (chartStatusInstance) chartStatusInstance.destroy();
         chartStatusInstance = new Chart(ctx1, {
@@ -798,7 +800,6 @@
             }
         });
 
-        // 2. Chart Kepatuhan SLA (Doughnut)
         const ctx2 = document.getElementById('chartSlaCanvas').getContext('2d');
         if (chartSlaInstance) chartSlaInstance.destroy();
         chartSlaInstance = new Chart(ctx2, {
@@ -817,7 +818,6 @@
             }
         });
 
-        // 3. Chart Kendala Lapangan (Bar Chart)
         const ctx3 = document.getElementById('chartKendalaCanvas').getContext('2d');
         if (chartKendalaInstance) chartKendalaInstance.destroy();
 
