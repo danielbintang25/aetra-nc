@@ -6,6 +6,8 @@
     <title>Aetra - Admin Dashboard NC</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Library SheetJS untuk Export Excel (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { background-color: #f4f6f9; font-family: 'Inter', sans-serif; color: #1e293b; margin: 0; overflow-x: hidden; }
@@ -81,6 +83,13 @@
         .modal-body { padding: 1.5rem; }
         .modal-footer { border-top: 1px solid #f1f5f9; padding: 1.5rem; }
         .modal-title { font-weight: 700; font-size: 1.15rem; }
+
+        /* STYLES KHUSUS PRINT LAPORAN BULANAN */
+        @media print {
+            body * { visibility: hidden; }
+            #areaCetakLaporan, #areaCetakLaporan * { visibility: visible; }
+            #areaCetakLaporan { position: absolute; left: 0; top: 0; width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -115,10 +124,14 @@
             <button class="btn btn-sm text-white fs-5 border-0 p-0 shadow-none" onclick="toggleSidebar()" title="Tutup/Buka Menu">☰</button>
             <h5 class="m-0 fw-bold fs-6">Aetra Smart Connect</h5>
         </div>
-        <button class="btn btn-outline-light btn-sm fw-bold" onclick="logout()">Logout</button>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-outline-light btn-sm fw-bold" onclick="bukaModalLaporan()">📊 Laporan Bulanan</button>
+            <button class="btn btn-outline-light btn-sm fw-bold" onclick="logout()">Logout</button>
+        </div>
     </div>
 
     <div class="container-fluid main-container">
+        <!-- KPI CARDS RINGKASAN DATA TOTAL -->
         <div class="row g-4 mb-4">
             <div class="col-md-3">
                 <div class="kpi-card kpi-card-blue">
@@ -166,7 +179,10 @@
                     <div class="col-md-2"><label class="form-label">Tahun Masuk</label><select id="filterTahun" class="form-select form-select-sm" onchange="renderTabel()"><option value="Semua">Semua Tahun</option><option value="2026">2026</option><option value="2027">2027</option></select></div>
                     <div class="col-md-2"><label class="form-label">Urutkan Data</label><select id="sortTanggal" class="form-select form-select-sm" onchange="renderTabel()"><option value="baru">Terbaru ke Lama</option><option value="lama">Terlama ke Baru</option></select></div>
                     <div class="col-md-2"><label class="form-label">Pencarian</label><input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Ketik No. Form / Nama..." onkeyup="renderTabel()"></div>
-                    <div class="col-md-2 text-md-end"><button class="btn btn-primary btn-sm btn-tambah" onclick="bukaModalTambah()">+ Tambah Data</button></div>
+                    <div class="col-md-2 text-md-end d-flex gap-2">
+                        <button class="btn btn-outline-success btn-sm btn-tambah" onclick="exportTabelKeExcel()" title="Download Excel Data Terfilter">📥 Export</button>
+                        <button class="btn btn-primary btn-sm btn-tambah" onclick="bukaModalTambah()">+ Tambah</button>
+                    </div>
                 </div>
             </div>
             
@@ -205,6 +221,7 @@
     </div>
 </div>
 
+<!-- MODAL FORM TAMBAH / EDIT -->
 <div class="modal fade" id="modalForm" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -220,6 +237,7 @@
   </div>
 </div>
 
+<!-- MODAL DETAIL PEMASANGAN -->
 <div class="modal fade" id="modalPemasangan" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -261,6 +279,104 @@
   </div>
 </div>
 
+<!-- MODAL LAPORAN BULANAN EKSEKUTIF -->
+<div class="modal fade" id="modalLaporanBulanan" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">📊 Rekapitulasi Laporan Bulanan Operasional</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="areaCetakLaporan">
+        <!-- FILTER BULAN LAPORAN -->
+        <div class="row g-2 mb-4 p-3 bg-light rounded border align-items-center">
+            <div class="col-md-5">
+                <label class="form-label small fw-bold">Pilih Bulan Laporan</label>
+                <select id="repBulan" class="form-select form-select-sm" onchange="generateRekapBulanan()">
+                    <option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option>
+                    <option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option>
+                    <option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option>
+                    <option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option>
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label small fw-bold">Pilih Tahun</label>
+                <select id="repTahun" class="form-select form-select-sm" onchange="generateRekapBulanan()">
+                    <option value="2026">2026</option><option value="2027">2027</option>
+                </select>
+            </div>
+            <div class="col-md-2 text-end pt-3">
+                <span class="badge bg-primary fs-6" id="badgePeriodeTitle">Ags 2026</span>
+            </div>
+        </div>
+
+        <!-- GRID METRIK UTAMA BULANAN -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="p-3 border rounded text-center bg-white">
+                    <p class="text-muted small fw-bold mb-1">Total Pendaftaran</p>
+                    <h3 class="fw-bold text-dark mb-0" id="repTotalReg">0</h3>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 border rounded text-center bg-white">
+                    <p class="text-muted small fw-bold mb-1">Pembayaran Diterima</p>
+                    <h3 class="fw-bold text-primary mb-0" id="repTotalBayar">0</h3>
+                    <small class="text-muted" id="repKonversiBayar">Konversi: 0%</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 border rounded text-center bg-white">
+                    <p class="text-muted small fw-bold mb-1">Kepatuhan SLA (≤14 Hr)</p>
+                    <h3 class="fw-bold text-success mb-0" id="repSlaRate">0%</h3>
+                    <small class="text-muted" id="repSlaDetail">0 dari 0 tuntas</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- PERINGATAN KENDALA & HASIL AKHIR -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm bg-light">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-3">📈 Hasil Pemasangan Lapangan</h6>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>✅ Pemasangan Sukses:</span>
+                            <strong class="text-success" id="repSuksesVal">0</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>❌ Pemasangan Gagal:</span>
+                            <strong class="text-danger" id="repGagalVal">0</strong>
+                        </div>
+                        <div class="d-flex justify-content-between pt-2 border-top">
+                            <span class="fw-bold">Tingkat Keberhasilan:</span>
+                            <strong id="repSuccessRate">0%</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm bg-light">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-3">⚠️ Distribusi Kendala Lapangan</h6>
+                        <ul class="list-group list-group-flush bg-transparent small" id="listKendalaRep">
+                            <li class="list-group-item bg-transparent text-muted">Belum ada data kendala.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-success" onclick="exportRekapExcelBulanan()">📥 Download Excel Rekap</button>
+        <button type="button" class="btn btn-primary" onclick="window.print()">🖨️ Cetak PDF / Print</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // ===================================================================
@@ -273,9 +389,11 @@
     let dbPelanggan = [];
     let modalInstance = new bootstrap.Modal(document.getElementById('modalForm'));
     let modalPemasanganIns = new bootstrap.Modal(document.getElementById('modalPemasangan'));
+    let modalLaporanIns = new bootstrap.Modal(document.getElementById('modalLaporanBulanan'));
     let modeEditId = null; 
     let currentPage = 1;
     let pageSize = 10;
+    let filteredDataTerakhir = [];
 
     function toggleSidebar() {
         const sidebar = document.getElementById('appSidebar');
@@ -427,6 +545,7 @@
         });
 
         dataTampil.sort((a, b) => fSort === "baru" ? (b.tgl_buat - a.tgl_buat) : (a.tgl_buat - b.tgl_buat));
+        filteredDataTerakhir = dataTampil; // Simpan untuk export excel
 
         let totalData = dataTampil.length;
         let totalPages = Math.ceil(totalData / pageSize) || 1;
@@ -480,7 +599,6 @@
                     else { slaHtml = `<span class="badge-sla bg-soft-danger">Lewat (${hKerja}/14)</span>`; }
                 }
             } else if (row.status === "Selesai") { 
-                // CEKAPAKAH KONDISI LAPANGAN GAGAL
                 let isGagal = row.riwayat_tgl && row.riwayat_tgl.detail_pemasangan && row.riwayat_tgl.detail_pemasangan.kondisi === "Gagal";
                 if (isGagal) {
                     slaHtml = `<span class="badge-sla bg-soft-danger">Gagal</span>`;
@@ -548,6 +666,143 @@
             <button class="btn btn-primary active" style="min-width: 35px;">${currentPage}</button>
             <button class="btn btn-outline-secondary" onclick="gantiHalaman(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>&gt;</button>
         `;
+    }
+
+    /* FITUR 1: EXPORT TABEL LANGSUNG KE EXCEL (.XLSX) */
+    function exportTabelKeExcel() {
+        if (!filteredDataTerakhir || filteredDataTerakhir.length === 0) {
+            alert("Tidak ada data untuk di-export!");
+            return;
+        }
+
+        let excelRows = filteredDataTerakhir.map((p, idx) => {
+            let tglMasuk = p.riwayat_tgl && p.riwayat_tgl["1"] ? p.riwayat_tgl["1"].split(',')[0] : formatTanggal(new Date(p.tgl_buat).toISOString());
+            let tglBayar = p.riwayat_tgl && p.riwayat_tgl.tgl_bayar_ts ? formatTanggal(p.riwayat_tgl.tgl_bayar_ts) : "-";
+            let det = (p.riwayat_tgl && p.riwayat_tgl.detail_pemasangan) || {};
+
+            return {
+                "No": idx + 1,
+                "No. Form": p.id,
+                "Nama Pelanggan": p.nama,
+                "No. WhatsApp": p.telepon,
+                "Alamat": p.alamat,
+                "Status Pemasangan": p.status,
+                "Tgl Masuk": tglMasuk,
+                "Tgl Bayar": tglBayar,
+                "Tgl Pemasangan": det.jadwal ? formatTanggal(det.jadwal) : "-",
+                "Kondisi Lapangan": det.kondisi || "-",
+                "Kategori Kendala": det.kategori || "-",
+                "Catatan Admin": det.catatan || "-"
+            };
+        });
+
+        let worksheet = XLSX.utils.json_to_sheet(excelRows);
+        let workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Data_Pelanggan");
+
+        let tglStr = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(workbook, `Laporan_Pelanggan_Aetra_${tglStr}.xlsx`);
+    }
+
+    /* FITUR 2: MODAL LAPORAN BULANAN EKSEKUTIF */
+    function bukaModalLaporan() {
+        let d = new Date();
+        document.getElementById("repBulan").value = d.getMonth().toString();
+        document.getElementById("repTahun").value = d.getFullYear().toString();
+        generateRekapBulanan();
+        modalLaporanIns.show();
+    }
+
+    function generateRekapBulanan() {
+        let blnSelected = document.getElementById("repBulan").value;
+        let thnSelected = document.getElementById("repTahun").value;
+        const listBlnName = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
+        document.getElementById("badgePeriodeTitle").innerText = `${listBlnName[blnSelected]} ${thnSelected}`;
+
+        let dataBulan = dbPelanggan.filter(p => {
+            let d = new Date(p.tgl_buat);
+            return d.getMonth().toString() === blnSelected && d.getFullYear().toString() === thnSelected;
+        });
+
+        let totalReg = dataBulan.length;
+        let totalBayar = dataBulan.filter(p => p.riwayat_tgl && p.riwayat_tgl.tgl_bayar_ts).length;
+        let konversiBayarPct = totalReg > 0 ? ((totalBayar / totalReg) * 100).toFixed(1) : 0;
+
+        let selesaiData = dataBulan.filter(p => p.status === "Selesai");
+        let totalSelesai = selesaiData.length;
+        let totalGagal = selesaiData.filter(p => p.riwayat_tgl && p.riwayat_tgl.detail_pemasangan && p.riwayat_tgl.detail_pemasangan.kondisi === "Gagal").length;
+        let totalSukses = totalSelesai - totalGagal;
+        let successRate = totalSelesai > 0 ? ((totalSukses / totalSelesai) * 100).toFixed(1) : 0;
+
+        // SLA Compliance: Pemasangan Selesai Tepat Waktu (<= 14 Hari Kerja)
+        let totalSlaTepat = 0;
+        let totalCekSla = 0;
+        dataBulan.forEach(p => {
+            if (p.riwayat_tgl && p.riwayat_tgl.tgl_bayar_ts) {
+                totalCekSla++;
+                let hKerja = hitungHariKerja(p.riwayat_tgl.tgl_bayar_ts);
+                if (hKerja <= 14) totalSlaTepat++;
+            }
+        });
+        let slaRatePct = totalCekSla > 0 ? ((totalSlaTepat / totalCekSla) * 100).toFixed(1) : 0;
+
+        document.getElementById("repTotalReg").innerText = totalReg;
+        document.getElementById("repTotalBayar").innerText = totalBayar;
+        document.getElementById("repKonversiBayar").innerText = `Konversi: ${konversiBayarPct}%`;
+        document.getElementById("repSlaRate").innerText = `${slaRatePct}%`;
+        document.getElementById("repSlaDetail").innerText = `${totalSlaTepat} dari ${totalCekSla} pendaftaran`;
+
+        document.getElementById("repSuksesVal").innerText = totalSukses;
+        document.getElementById("repGagalVal").innerText = totalGagal;
+        document.getElementById("repSuccessRate").innerText = `${successRate}%`;
+
+        // DISTRIBUSI KENDALA
+        let kendalaCounts = {};
+        dataBulan.forEach(p => {
+            if (p.riwayat_tgl && p.riwayat_tgl.detail_pemasangan && p.riwayat_tgl.detail_pemasangan.kategori) {
+                let kat = p.riwayat_tgl.detail_pemasangan.kategori;
+                kendalaCounts[kat] = (kendalaCounts[kat] || 0) + 1;
+            }
+        });
+
+        let listKendalaEl = document.getElementById("listKendalaRep");
+        listKendalaEl.innerHTML = "";
+        let keys = Object.keys(kendalaCounts);
+        if (keys.length === 0) {
+            listKendalaEl.innerHTML = `<li class="list-group-item bg-transparent text-muted text-center py-2">Tidak ada kendala tercatat di periode ini.</li>`;
+        } else {
+            keys.forEach(k => {
+                listKendalaEl.innerHTML += `
+                    <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-1 border-0">
+                        <span>• ${k}</span>
+                        <span class="badge bg-warning text-dark rounded-pill">${kendalaCounts[k]} Kasus</span>
+                    </li>
+                `;
+            });
+        }
+    }
+
+    function exportRekapExcelBulanan() {
+        let blnSelected = document.getElementById("repBulan").value;
+        let thnSelected = document.getElementById("repTahun").value;
+        const listBlnName = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        
+        let summarySheetData = [
+            { "Indikator": "Periode Laporan", "Nilai": `${listBlnName[blnSelected]} ${thnSelected}` },
+            { "Indikator": "Total Pendaftaran", "Nilai": document.getElementById("repTotalReg").innerText },
+            { "Indikator": "Pembayaran Diterima", "Nilai": document.getElementById("repTotalBayar").innerText },
+            { "Indikator": "Tingkat Konversi Pembayaran", "Nilai": document.getElementById("repKonversiBayar").innerText },
+            { "Indikator": "Pemasangan Sukses", "Nilai": document.getElementById("repSuksesVal").innerText },
+            { "Indikator": "Pemasangan Gagal", "Nilai": document.getElementById("repGagalVal").innerText },
+            { "Indikator": "Tingkat Keberhasilan Pemasangan", "Nilai": document.getElementById("repSuccessRate").innerText },
+            { "Indikator": "Kepatuhan SLA (<= 14 Hari Kerja)", "Nilai": document.getElementById("repSlaRate").innerText }
+        ];
+
+        let ws = XLSX.utils.json_to_sheet(summarySheetData);
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Rekap_Eksekutif");
+
+        XLSX.writeFile(wb, `Rekap_Eksekutif_Aetra_${listBlnName[blnSelected]}_${thnSelected}.xlsx`);
     }
 
     function bukaModalTambah() { modeEditId = null; document.getElementById("modalTitle").innerText = "Registrasi Baru"; document.getElementById("inputNoForm").value = ""; document.getElementById("inputNoForm").disabled = false; document.getElementById("inputNama").value = ""; document.getElementById("inputTelepon").value = ""; document.getElementById("inputAlamat").value = ""; modalInstance.show(); }
