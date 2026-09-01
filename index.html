@@ -87,7 +87,7 @@
         .modal-footer { border-top: 1px solid #f1f5f9; padding: 1.5rem; }
         .modal-title { font-weight: 700; font-size: 1.15rem; }
 
-        .chart-container-box { background: #ffffff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); height: 100%; }
+        .chart-container-box { background: #ffffff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); height: 100%; border: 1px solid #f1f5f9; }
 
         @media print {
             body * { visibility: hidden; }
@@ -126,9 +126,10 @@
         </ul>
     </div>
 
+    <!-- LOGOUT HANYA TULISAN TANPA ICON -->
     <div class="sidebar-footer">
-        <button class="btn btn-outline-danger w-100 fw-bold d-flex align-items-center justify-content-center gap-2 py-2" onclick="logout()">
-            🚪 Logout
+        <button class="btn btn-outline-danger w-100 fw-bold py-2" onclick="logout()">
+            Logout
         </button>
     </div>
 </div>
@@ -232,7 +233,7 @@
         </div>
     </div>
 
-    <!-- VIEW 2: HALAMAN LAPORAN BULANAN (TAMPILAN FULL DENGAN DIAGRAM) -->
+    <!-- VIEW 2: HALAMAN LAPORAN BULANAN (DENGAN DIAGRAM COMPACT) -->
     <div id="viewLaporan" class="container-fluid main-container hide">
         <div id="areaCetakHalaman">
             <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
@@ -255,6 +256,7 @@
                 </div>
             </div>
 
+            <!-- METRIK RINGKASAN DATA -->
             <div class="row g-4 mb-4">
                 <div class="col-md-3">
                     <div class="p-3 border rounded-3 bg-white shadow-sm text-center">
@@ -285,29 +287,36 @@
                 </div>
             </div>
 
+            <!-- DIAGRAM VISUAL (GRID COMPACT BERSIH) -->
             <div class="row g-4 mb-4">
+                <!-- 1. DIAGRAM STATUS PEMASANGAN -->
                 <div class="col-md-6">
                     <div class="chart-container-box">
-                        <h6 class="fw-bold text-dark mb-3">📈 Diagram Hasil Pemasangan Lapangan</h6>
-                        <div style="position: relative; height:240px;">
+                        <h6 class="fw-bold text-dark mb-1">Status Pemasangan</h6>
+                        <p class="text-muted small mb-3">Distribusi status pendaftaran saat ini</p>
+                        <div style="position: relative; height:230px;">
                             <canvas id="chartStatusCanvas"></canvas>
                         </div>
                     </div>
                 </div>
 
+                <!-- 2. DIAGRAM KEPATUHAN SLA -->
                 <div class="col-md-6">
                     <div class="chart-container-box">
-                        <h6 class="fw-bold text-dark mb-3">⏱️ Diagram Kepatuhan Batas Waktu SLA (14 Hari)</h6>
-                        <div style="position: relative; height:240px;">
+                        <h6 class="fw-bold text-dark mb-1">Kepatuhan SLA (14 Hari)</h6>
+                        <p class="text-muted small mb-3">Rasio penyelesaian tepat waktu vs lewat SLA</p>
+                        <div style="position: relative; height:230px;">
                             <canvas id="chartSlaCanvas"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-12">
+                <!-- 3. DIAGRAM ALASAN KEGAGALAN / KENDALA (COMPACT SEPERTI REFERENSI GAMBAR 1) -->
+                <div class="col-md-6">
                     <div class="chart-container-box">
-                        <h6 class="fw-bold text-dark mb-3">⚠️ Diagram Kategori Kendala Lapangan</h6>
-                        <div style="position: relative; height:260px;">
+                        <h6 class="fw-bold text-dark mb-1">Alasan Kegagalan & Kendala</h6>
+                        <p class="text-muted small mb-3">Rincian penyebab masalah di lapangan</p>
+                        <div style="position: relative; height:230px;">
                             <canvas id="chartKendalaCanvas"></canvas>
                         </div>
                     </div>
@@ -782,6 +791,7 @@
     }
 
     function renderDiagrams(sukses, gagal, proses, slaTepat, slaLewat, kendalaCounts) {
+        // 1. Diagram Status Pemasangan (Doughnut Chart)
         const ctx1 = document.getElementById('chartStatusCanvas').getContext('2d');
         if (chartStatusInstance) chartStatusInstance.destroy();
         chartStatusInstance = new Chart(ctx1, {
@@ -800,6 +810,7 @@
             }
         });
 
+        // 2. Diagram Kepatuhan SLA (Doughnut Chart)
         const ctx2 = document.getElementById('chartSlaCanvas').getContext('2d');
         if (chartSlaInstance) chartSlaInstance.destroy();
         chartSlaInstance = new Chart(ctx2, {
@@ -818,6 +829,7 @@
             }
         });
 
+        // 3. Diagram Alasan Kegagalan / Kendala (Compact Bar Chart seperti Gambar 1)
         const ctx3 = document.getElementById('chartKendalaCanvas').getContext('2d');
         if (chartKendalaInstance) chartKendalaInstance.destroy();
 
@@ -833,16 +845,29 @@
             data: {
                 labels: labelsKendala,
                 datasets: [{
-                    label: 'Jumlah Kasus Kendala',
+                    label: 'Jumlah Kasus',
                     data: valuesKendala,
-                    backgroundColor: '#f59e0b',
-                    borderRadius: 6
+                    backgroundColor: '#0284c7',
+                    borderRadius: 4,
+                    maxBarThickness: 38
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 10 },
+                            callback: function(val) {
+                                let label = this.getLabelForValue(val);
+                                return label.length > 18 ? label.substr(0, 18) + '...' : label;
+                            }
+                        }
+                    },
+                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                },
                 plugins: { legend: { display: false } }
             }
         });
