@@ -12,19 +12,35 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { background-color: #f4f6f9; font-family: 'Inter', sans-serif; color: #1e293b; margin: 0; overflow-x: hidden; }
         
-        .sidebar { position: fixed; top: 0; left: 0; width: 240px; height: 100vh; background: #ffffff; border-right: 1px solid #e2e8f0; z-index: 1000; padding: 20px; display: flex; flex-direction: column; transition: transform 0.3s ease; }
+        /* SIDEBAR WARNA DARK NAVY PREMIUM */
+        .sidebar { 
+            position: fixed; top: 0; left: 0; width: 240px; height: 100vh; 
+            background: #0f172a; 
+            color: #ffffff;
+            border-right: 1px solid #1e293b; 
+            z-index: 1000; padding: 20px; display: flex; flex-direction: column; transition: transform 0.3s ease; 
+        }
         .sidebar.collapsed { transform: translateX(-240px); }
         
-        .sidebar-brand { text-align: center; margin-bottom: 30px; padding: 0; }
-        .sidebar-brand img { max-height: 65px; width: auto; object-fit: contain; display: inline-block; }
+        .sidebar-brand { text-align: center; margin-bottom: 25px; padding: 10px; background: #ffffff; border-radius: 12px; }
+        .sidebar-brand img { max-height: 55px; width: auto; object-fit: contain; display: inline-block; }
 
         .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .sidebar-menu li { margin-bottom: 6px; }
-        .sidebar-menu li a { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #64748b; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 0.9rem; transition: 0.2s; }
-        .sidebar-menu li.active a, .sidebar-menu li a:hover { background-color: #eff6ff; color: #2563eb; font-weight: 600; }
+        .sidebar-menu li a { 
+            display: flex; align-items: center; gap: 10px; padding: 12px 15px; 
+            color: #94a3b8; text-decoration: none; border-radius: 10px; 
+            font-weight: 500; font-size: 0.9rem; transition: all 0.2s ease; 
+        }
+        .sidebar-menu li.active a, .sidebar-menu li a:hover { 
+            background-color: #1e293b; 
+            color: #38bdf8; 
+            font-weight: 600; 
+        }
 
-        .sidebar-footer { margin-top: auto; padding-top: 15px; border-top: 1px solid #f1f5f9; }
+        .sidebar-footer { margin-top: auto; padding-top: 15px; border-top: 1px solid #1e293b; }
 
+        /* MAIN WRAPPER */
         .main-wrapper { margin-left: 0; min-height: 100vh; display: flex; flex-direction: column; transition: margin-left 0.3s ease; }
         .main-wrapper:not(.expanded) { margin-left: 240px; }
 
@@ -34,6 +50,7 @@
         .hide { display: none !important; }
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255,255,255,0.9); z-index: 9998; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px; color: #3b82f6;}
         
+        /* KPI CARDS */
         .kpi-card { border: none; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); padding: 1.5rem; transition: transform 0.2s; height: 100%; border-left: 4px solid transparent; }
         .kpi-card:hover { transform: translateY(-3px); }
         .kpi-card-blue { border-left-color: #3b82f6; }
@@ -114,7 +131,7 @@
     </div>
 </div>
 
-<!-- SIDEBAR MENU -->
+<!-- SIDEBAR MENU BERWARNA DARK NAVY -->
 <div class="sidebar collapsed" id="appSidebar">
     <div>
         <div class="sidebar-brand">
@@ -126,9 +143,9 @@
         </ul>
     </div>
 
-    <!-- LOGOUT HANYA TULISAN TANPA ICON -->
+    <!-- LOGOUT BUTTON TRIGER MODAL -->
     <div class="sidebar-footer">
-        <button class="btn btn-outline-danger w-100 fw-bold py-2" onclick="logout()">
+        <button class="btn btn-outline-danger w-100 fw-bold py-2" onclick="bukaModalLogout()">
             Logout
         </button>
     </div>
@@ -233,7 +250,7 @@
         </div>
     </div>
 
-    <!-- VIEW 2: HALAMAN LAPORAN BULANAN (DENGAN DIAGRAM COMPACT) -->
+    <!-- VIEW 2: HALAMAN LAPORAN BULANAN -->
     <div id="viewLaporan" class="container-fluid main-container hide">
         <div id="areaCetakHalaman">
             <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
@@ -256,7 +273,6 @@
                 </div>
             </div>
 
-            <!-- METRIK RINGKASAN DATA -->
             <div class="row g-4 mb-4">
                 <div class="col-md-3">
                     <div class="p-3 border rounded-3 bg-white shadow-sm text-center">
@@ -287,9 +303,7 @@
                 </div>
             </div>
 
-            <!-- DIAGRAM VISUAL (GRID COMPACT BERSIH) -->
             <div class="row g-4 mb-4">
-                <!-- 1. DIAGRAM STATUS PEMASANGAN -->
                 <div class="col-md-6">
                     <div class="chart-container-box">
                         <h6 class="fw-bold text-dark mb-1">Status Pemasangan</h6>
@@ -300,7 +314,6 @@
                     </div>
                 </div>
 
-                <!-- 2. DIAGRAM KEPATUHAN SLA -->
                 <div class="col-md-6">
                     <div class="chart-container-box">
                         <h6 class="fw-bold text-dark mb-1">Kepatuhan SLA (14 Hari)</h6>
@@ -311,7 +324,6 @@
                     </div>
                 </div>
 
-                <!-- 3. DIAGRAM ALASAN KEGAGALAN / KENDALA (COMPACT SEPERTI REFERENSI GAMBAR 1) -->
                 <div class="col-md-6">
                     <div class="chart-container-box">
                         <h6 class="fw-bold text-dark mb-1">Alasan Kegagalan & Kendala</h6>
@@ -324,6 +336,25 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- MODAL KONFIRMASI LOGOUT -->
+<div class="modal fade" id="modalLogout" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h6 class="modal-title fw-bold" style="color:#0f172a;">Konfirmasi Logout</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-3">
+        <p class="mb-0 text-muted small">Apakah Anda yakin ingin keluar dari sistem Aetra Smart Connect?</p>
+      </div>
+      <div class="modal-footer border-0 pt-0 d-flex gap-2">
+        <button type="button" class="btn btn-light border btn-sm flex-fill fw-bold text-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-danger btn-sm flex-fill fw-bold" onclick="logout()">Ya, Keluar</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL FORM TAMBAH / EDIT -->
@@ -402,6 +433,7 @@
     let dbPelanggan = [];
     let modalInstance = new bootstrap.Modal(document.getElementById('modalForm'));
     let modalPemasanganIns = new bootstrap.Modal(document.getElementById('modalPemasangan'));
+    let modalLogoutIns = new bootstrap.Modal(document.getElementById('modalLogout'));
     let modeEditId = null; 
     let currentPage = 1;
     let pageSize = 10;
@@ -416,6 +448,10 @@
         const mainWrapper = document.getElementById('mainWrapper');
         sidebar.classList.toggle('collapsed');
         mainWrapper.classList.toggle('expanded');
+    }
+
+    function bukaModalLogout() {
+        modalLogoutIns.show();
     }
 
     function switchView(viewName) {
@@ -473,6 +509,7 @@
     }
     
     async function logout() { 
+        modalLogoutIns.hide();
         document.getElementById('loading-overlay').innerText = 'Keluar Sistem...';
         document.getElementById('loading-overlay').classList.remove('hide');
         await _supabase.auth.signOut(); 
@@ -791,7 +828,6 @@
     }
 
     function renderDiagrams(sukses, gagal, proses, slaTepat, slaLewat, kendalaCounts) {
-        // 1. Diagram Status Pemasangan (Doughnut Chart)
         const ctx1 = document.getElementById('chartStatusCanvas').getContext('2d');
         if (chartStatusInstance) chartStatusInstance.destroy();
         chartStatusInstance = new Chart(ctx1, {
@@ -810,7 +846,6 @@
             }
         });
 
-        // 2. Diagram Kepatuhan SLA (Doughnut Chart)
         const ctx2 = document.getElementById('chartSlaCanvas').getContext('2d');
         if (chartSlaInstance) chartSlaInstance.destroy();
         chartSlaInstance = new Chart(ctx2, {
@@ -829,7 +864,6 @@
             }
         });
 
-        // 3. Diagram Alasan Kegagalan / Kendala (Compact Bar Chart seperti Gambar 1)
         const ctx3 = document.getElementById('chartKendalaCanvas').getContext('2d');
         if (chartKendalaInstance) chartKendalaInstance.destroy();
 
