@@ -12,33 +12,24 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { background-color: #f4f6f9; font-family: 'Inter', sans-serif; color: #1e293b; margin: 0; overflow-x: hidden; }
         
-        /* SIDEBAR WARNA DARK NAVY PREMIUM */
+        /* SIDEBAR PUTIH KEMBALI SEPERTI SEMULA */
         .sidebar { 
             position: fixed; top: 0; left: 0; width: 240px; height: 100vh; 
-            background: #0f172a; 
-            color: #ffffff;
-            border-right: 1px solid #1e293b; 
+            background: #ffffff; 
+            border-right: 1px solid #e2e8f0; 
             z-index: 1000; padding: 20px; display: flex; flex-direction: column; transition: transform 0.3s ease; 
         }
         .sidebar.collapsed { transform: translateX(-240px); }
         
-        .sidebar-brand { text-align: center; margin-bottom: 25px; padding: 10px; background: #ffffff; border-radius: 12px; }
-        .sidebar-brand img { max-height: 55px; width: auto; object-fit: contain; display: inline-block; }
+        .sidebar-brand { text-align: center; margin-bottom: 30px; padding: 0; }
+        .sidebar-brand img { max-height: 65px; width: auto; object-fit: contain; display: inline-block; }
 
         .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .sidebar-menu li { margin-bottom: 6px; }
-        .sidebar-menu li a { 
-            display: flex; align-items: center; gap: 10px; padding: 12px 15px; 
-            color: #94a3b8; text-decoration: none; border-radius: 10px; 
-            font-weight: 500; font-size: 0.9rem; transition: all 0.2s ease; 
-        }
-        .sidebar-menu li.active a, .sidebar-menu li a:hover { 
-            background-color: #1e293b; 
-            color: #38bdf8; 
-            font-weight: 600; 
-        }
+        .sidebar-menu li a { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #64748b; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 0.9rem; transition: 0.2s; }
+        .sidebar-menu li.active a, .sidebar-menu li a:hover { background-color: #eff6ff; color: #2563eb; font-weight: 600; }
 
-        .sidebar-footer { margin-top: auto; padding-top: 15px; border-top: 1px solid #1e293b; }
+        .sidebar-footer { margin-top: auto; padding-top: 15px; border-top: 1px solid #f1f5f9; }
 
         /* MAIN WRAPPER */
         .main-wrapper { margin-left: 0; min-height: 100vh; display: flex; flex-direction: column; transition: margin-left 0.3s ease; }
@@ -66,8 +57,20 @@
         .table-container { background: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); padding: 1.25rem; border: none; }
         .table-toolbar { border-bottom: 1px solid #f1f5f9; padding-bottom: 1rem; margin-bottom: 1rem; }
         
+        /* HEADER TABEL BERWARNA DARK NAVY */
         .table { margin-bottom: 0; }
-        .table thead th { background-color: #f8fafc; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; border-bottom: 1px solid #e2e8f0; padding: 1rem; border-top: none; text-align: center; }
+        .table thead th { 
+            background-color: #0f172a !important; 
+            color: #ffffff !important; 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            font-weight: 600; 
+            border-bottom: 1px solid #e2e8f0; 
+            padding: 1rem; 
+            border-top: none; 
+            text-align: center; 
+        }
         .table tbody td { padding: 0.85rem 1rem; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: middle; font-size: 0.875rem; }
         .table tbody tr:hover { background-color: #f8fafc; }
         
@@ -131,7 +134,7 @@
     </div>
 </div>
 
-<!-- SIDEBAR MENU BERWARNA DARK NAVY -->
+<!-- SIDEBAR MENU UTAMA -->
 <div class="sidebar collapsed" id="appSidebar">
     <div>
         <div class="sidebar-brand">
@@ -143,7 +146,6 @@
         </ul>
     </div>
 
-    <!-- LOGOUT BUTTON TRIGER MODAL -->
     <div class="sidebar-footer">
         <button class="btn btn-outline-danger w-100 fw-bold py-2" onclick="bukaModalLogout()">
             Logout
@@ -216,7 +218,7 @@
                 </div>
             </div>
             
-            <div class="overflow-auto">
+            <div class="overflow-auto" style="border-radius: 8px; border: 1px solid #e2e8f0;">
                 <table class="table align-middle">
                     <thead>
                         <tr>
