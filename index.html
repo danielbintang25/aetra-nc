@@ -92,6 +92,14 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
+
+        /* OPSI DROPDOWN BERLATAR PUTIH BERSIH TANPA WARNA */
+        .status-select-pill option {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+            font-weight: 500 !important;
+        }
+
         .status-pendaftaran { background-color: #dbeafe !important; color: #1e40af !important; border-color: #bfdbfe !important; }
         .status-pembayaran { background-color: #fef3c7 !important; color: #92400e !important; border-color: #fde68a !important; }
         .status-proses { background-color: #e0f2fe !important; color: #0369a1 !important; border-color: #bae6fd !important; }
@@ -104,7 +112,30 @@
         
         .btn-tambah { display: flex; align-items: center; justify-content: center; height: 38px; width: 100%; font-weight: 600; }
 
+        /* AKSI CONTAINER UNTUK PRESISI PRESISI TOMBOL */
+        .action-container {
+            width: 180px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .action-container .btn-group {
+            width: 100%;
+        }
         .btn-action-custom {
+            padding: 4px 6px !important;
+            font-size: 0.75rem !important;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .btn-action-custom img, .btn-wa-custom img { width: 13px; height: 13px; object-fit: contain; }
+
+        .btn-wa-custom {
+            width: 100% !important;
             padding: 4px 8px !important;
             font-size: 0.75rem !important;
             font-weight: 600;
@@ -112,9 +143,16 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 5px;
+            background-color: #0d9488;
+            color: #ffffff;
+            border: none;
+            box-sizing: border-box !important;
         }
-        .btn-action-custom img { width: 13px; height: 13px; object-fit: contain; }
+        .btn-wa-custom:hover {
+            background-color: #0f766e;
+            color: #ffffff;
+        }
 
         .badge-sla { font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; font-weight: 600;}
         .bg-soft-warning { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a;}
@@ -655,7 +693,6 @@
 
         let totalData = dataTampil.length;
         
-        /* EMPTY STATE JIKA DATA TIDAK DITEMUKAN */
         if (totalData === 0) {
             tbody.innerHTML = `
                 <tr>
@@ -763,8 +800,8 @@
                     ${btnDetailPasang}
                 </td>
                 <td class="text-center">
-                    <div class="d-flex flex-column align-items-center gap-1">
-                        <div class="btn-group btn-group-sm w-100" style="max-width: 175px;">
+                    <div class="action-container">
+                        <div class="btn-group btn-group-sm">
                             <button class="btn btn-outline-secondary btn-action-custom" onclick="bukaModalEdit('${row.id}')">
                                 <img src="pencil.png" alt="Edit"> Edit
                             </button>
@@ -775,7 +812,7 @@
                                 <img src="link.png" alt="Link"> Link
                             </a>
                         </div>
-                        <button class="btn btn-sm text-white btn-action-custom w-100" style="max-width: 175px; background-color: #0d9488;" onclick="kirimWA('${row.id}', '${linkTracker}')">
+                        <button class="btn btn-wa-custom" onclick="kirimWA('${row.id}', '${linkTracker}')">
                             <img src="whatsapp.png" alt="WA"> Kirim WA
                         </button>
                     </div>
