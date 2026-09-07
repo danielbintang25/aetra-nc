@@ -8,6 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FULLCALENDAR JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { background-color: #f4f6f9; font-family: 'Inter', sans-serif; color: #1e293b; margin: 0; overflow-x: hidden; }
@@ -93,7 +95,6 @@
             transition: all 0.2s ease;
         }
 
-        /* OPSI DROPDOWN BERLATAR PUTIH BERSIH TANPA WARNA */
         .status-select-pill option {
             background-color: #ffffff !important;
             color: #1e293b !important;
@@ -112,7 +113,7 @@
         
         .btn-tambah { display: flex; align-items: center; justify-content: center; height: 38px; width: 100%; font-weight: 600; }
 
-        /* AKSI CONTAINER UNTUK PRESISI PRESISI TOMBOL */
+        /* AKSI CONTAINER UNTUK PRESISI TOMBOL */
         .action-container {
             width: 180px;
             margin: 0 auto;
@@ -168,6 +169,17 @@
 
         .chart-container-box { background: #ffffff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); height: 100%; border: 1px solid #f1f5f9; }
 
+        /* FULLCALENDAR CUSTOM STYLING */
+        #calendar {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        .fc .fc-toolbar-title { font-size: 1.2rem; font-weight: 700; color: #0f172a; }
+        .fc .fc-button-primary { background-color: #2563eb; border-color: #2563eb; font-weight: 600; text-transform: capitalize; border-radius: 6px; }
+        .fc .fc-button-primary:hover { background-color: #1d4ed8; border-color: #1d4ed8; }
+        .fc .fc-button-primary:disabled { background-color: #94a3b8; border-color: #94a3b8; }
+        .fc-event { cursor: pointer; border-radius: 4px; padding: 2px 4px; font-size: 0.8rem; font-weight: 500; border: none !important; }
+
         @media print {
             body * { visibility: hidden; }
             #areaCetakHalaman, #areaCetakHalaman * { visibility: visible; }
@@ -202,6 +214,7 @@
         <ul class="sidebar-menu">
             <li id="navDashboard" class="active"><a href="#" onclick="switchView('dashboard'); return false;">📊 Dashboard</a></li>
             <li id="navLaporan"><a href="#" onclick="switchView('laporan'); return false;">📋 Laporan Bulanan</a></li>
+            <li id="navKalender"><a href="#" onclick="switchView('kalender'); return false;">📅 Kalender Jadwal</a></li>
         </ul>
     </div>
 
@@ -397,6 +410,28 @@
             </div>
         </div>
     </div>
+
+    <!-- VIEW 3: HALAMAN KALENDER JADWAL -->
+    <div id="viewKalender" class="container-fluid main-container hide">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div class="section-title-accent">
+                <h4 class="fw-bold mb-1" style="color:#0f172a;">📅 Kalender Penjadwalan Pemasangan</h4>
+                <p class="text-muted small mb-0">Pemantauan Jadwal Operasional & Tim Lapangan Secara Visual</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2 small fw-semibold">
+                    <span class="badge rounded-pill" style="background:#0284c7;">🔵 Dalam Proses</span>
+                    <span class="badge rounded-pill" style="background:#10b981;">🟢 Sukses</span>
+                    <span class="badge rounded-pill" style="background:#f59e0b;">🟡 Tertunda</span>
+                    <span class="badge rounded-pill" style="background:#ef4444;">🔴 Gagal</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm p-4 rounded-3 bg-white">
+            <div id="calendar"></div>
+        </div>
+    </div>
 </div>
 
 <!-- MODAL KONFIRMASI LOGOUT -->
@@ -503,6 +538,7 @@
     let chartStatusInstance = null;
     let chartSlaInstance = null;
     let chartKendalaInstance = null;
+    let calendarInstance = null;
 
     function toggleSidebar() {
         const sidebar = document.getElementById('appSidebar');
@@ -518,20 +554,27 @@
     function switchView(viewName) {
         document.getElementById('navDashboard').classList.remove('active');
         document.getElementById('navLaporan').classList.remove('active');
+        document.getElementById('navKalender').classList.remove('active');
+
+        document.getElementById('viewDashboard').classList.add('hide');
+        document.getElementById('viewLaporan').classList.add('hide');
+        document.getElementById('viewKalender').classList.add('hide');
 
         if (viewName === 'dashboard') {
             document.getElementById('navDashboard').classList.add('active');
             document.getElementById('viewDashboard').classList.remove('hide');
-            document.getElementById('viewLaporan').classList.add('hide');
         } else if (viewName === 'laporan') {
             document.getElementById('navLaporan').classList.add('active');
-            document.getElementById('viewDashboard').classList.add('hide');
             document.getElementById('viewLaporan').classList.remove('hide');
             
             let d = new Date();
             document.getElementById("repBulan").value = d.getMonth().toString();
             document.getElementById("repTahun").value = d.getFullYear().toString();
             generateRekapBulanan();
+        } else if (viewName === 'kalender') {
+            document.getElementById('navKalender').classList.add('active');
+            document.getElementById('viewKalender').classList.remove('hide');
+            setTimeout(() => { renderKalender(); }, 100);
         }
     }
 
@@ -632,7 +675,13 @@
         document.getElementById('loading-overlay').classList.remove('hide');
         const { data, error } = await _supabase.from('pelanggan').select('*');
         if (error) { alert("Koneksi ke Database Gagal!"); console.error(error); } 
-        else { dbPelanggan = data; renderTabel(); }
+        else { 
+            dbPelanggan = data; 
+            renderTabel(); 
+            if (!document.getElementById('viewKalender').classList.contains('hide')) {
+                renderKalender();
+            }
+        }
         document.getElementById('loading-overlay').classList.add('hide');
     }
 
@@ -827,6 +876,62 @@
             <button class="btn btn-primary active" style="min-width: 35px;">${currentPage}</button>
             <button class="btn btn-outline-secondary" onclick="gantiHalaman(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>&gt;</button>
         `;
+    }
+
+    function renderKalender() {
+        const calendarEl = document.getElementById('calendar');
+        if (!calendarEl) return;
+
+        let events = [];
+        dbPelanggan.forEach(p => {
+            let det = (p.riwayat_tgl && p.riwayat_tgl.detail_pemasangan) || {};
+            if (det.jadwal) {
+                let color = '#0284c7'; 
+                if (det.kondisi === 'Sukses') color = '#10b981';
+                else if (det.kondisi === 'Tertunda') color = '#f59e0b';
+                else if (det.kondisi === 'Gagal') color = '#ef4444';
+
+                let timLabel = det.kontraktor ? ` (${det.kontraktor})` : '';
+
+                events.push({
+                    id: p.id,
+                    title: `${p.id} - ${p.nama}${timLabel}`,
+                    start: det.jadwal,
+                    backgroundColor: color,
+                    borderColor: color,
+                    textColor: '#ffffff'
+                });
+            }
+        });
+
+        if (calendarInstance) {
+            calendarInstance.destroy();
+        }
+
+        calendarInstance = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'id',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,listWeek'
+            },
+            buttonText: {
+                today: 'Hari Ini',
+                month: 'Bulan',
+                week: 'Minggu',
+                list: 'Daftar Agenda'
+            },
+            events: events,
+            eventClick: function(info) {
+                let pId = info.event.id;
+                if (pId) {
+                    bukaModalPemasangan(pId);
+                }
+            }
+        });
+
+        calendarInstance.render();
     }
 
     function exportTabelKeExcel() {
