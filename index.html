@@ -169,16 +169,113 @@
 
         .chart-container-box { background: #ffffff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); height: 100%; border: 1px solid #f1f5f9; }
 
-        /* FULLCALENDAR CUSTOM STYLING */
+        /* FULLCALENDAR ENTERPRISE CUSTOM STYLING OVERRIDES */
         #calendar {
-            max-width: 100%;
+            width: 100%;
             margin: 0 auto;
         }
-        .fc .fc-toolbar-title { font-size: 1.2rem; font-weight: 700; color: #0f172a; }
-        .fc .fc-button-primary { background-color: #2563eb; border-color: #2563eb; font-weight: 600; text-transform: capitalize; border-radius: 6px; }
-        .fc .fc-button-primary:hover { background-color: #1d4ed8; border-color: #1d4ed8; }
-        .fc .fc-button-primary:disabled { background-color: #94a3b8; border-color: #94a3b8; }
-        .fc-event { cursor: pointer; border-radius: 4px; padding: 2px 4px; font-size: 0.8rem; font-weight: 500; border: none !important; }
+        .fc {
+            font-family: 'Inter', sans-serif !important;
+        }
+        .fc .fc-toolbar {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            margin-bottom: 1.5rem !important;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .fc .fc-toolbar-title { 
+            font-size: 1.35rem !important; 
+            font-weight: 700 !important; 
+            color: #0f172a !important; 
+        }
+        .fc .fc-button {
+            background-color: #ffffff !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #475569 !important;
+            font-weight: 600 !important;
+            font-size: 0.85rem !important;
+            padding: 0.45rem 0.85rem !important;
+            border-radius: 8px !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+            transition: all 0.2s ease !important;
+            text-transform: capitalize !important;
+        }
+        .fc .fc-button:hover {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+            border-color: #94a3b8 !important;
+        }
+        .fc .fc-button-primary:not(:disabled).fc-button-active, 
+        .fc .fc-button-primary:not(:disabled):active {
+            background-color: #2563eb !important;
+            border-color: #2563eb !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2) !important;
+        }
+        .fc .fc-button-group {
+            border-radius: 8px;
+            box-shadow: none;
+        }
+        .fc .fc-button-group > .fc-button {
+            border-radius: 0 !important;
+        }
+        .fc .fc-button-group > .fc-button:first-child {
+            border-top-left-radius: 8px !important;
+            border-bottom-left-radius: 8px !important;
+        }
+        .fc .fc-button-group > .fc-button:last-child {
+            border-top-right-radius: 8px !important;
+            border-bottom-right-radius: 8px !important;
+        }
+        .fc .fc-col-header-cell {
+            background-color: #f8fafc !important;
+            padding: 10px 0 !important;
+            border-color: #e2e8f0 !important;
+        }
+        .fc .fc-col-header-cell-cushion {
+            color: #475569 !important;
+            text-decoration: none !important;
+            font-weight: 700 !important;
+            font-size: 0.8rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em;
+        }
+        .fc .fc-daygrid-day-number {
+            color: #334155 !important;
+            text-decoration: none !important;
+            font-weight: 600 !important;
+            font-size: 0.85rem !important;
+            padding: 8px !important;
+        }
+        .fc .fc-daygrid-day.fc-day-today {
+            background-color: #eff6ff !important;
+        }
+        .fc .fc-daygrid-day-frame {
+            min-height: 110px !important;
+        }
+        .fc td, .fc th {
+            border-color: #e2e8f0 !important;
+        }
+        .fc-event { 
+            cursor: pointer !important; 
+            border-radius: 6px !important; 
+            padding: 3px 8px !important; 
+            font-size: 0.78rem !important; 
+            font-weight: 600 !important; 
+            border: none !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+            margin-top: 3px !important;
+            transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+        }
+        .fc-event:hover {
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.12) !important;
+        }
+        .fc .fc-scroller {
+            overflow: visible !important;
+        }
 
         @media print {
             body * { visibility: hidden; }
@@ -911,6 +1008,7 @@
         calendarInstance = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             locale: 'id',
+            height: 'auto',
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
