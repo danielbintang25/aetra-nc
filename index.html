@@ -19,7 +19,7 @@
             color: #1e293b; 
             margin: 0; 
             overflow-x: hidden; 
-            font-size: 0.8125rem; /* Ukuran dasar lebih ringkas */
+            font-size: 0.8125rem;
         }
         
         /* SIDEBAR PUTIH CLEAN */
@@ -960,6 +960,19 @@
         });
 
         let worksheet = XLSX.utils.json_to_sheet(excelRows);
+
+        // OTOMATISASI LEBAR KOLOM (AUTOFIT) AGAR TIDAK TERPOTONG
+        const keys = Object.keys(excelRows[0]);
+        const colWidths = keys.map(key => {
+            let maxLen = key.length;
+            excelRows.forEach(row => {
+                let val = row[key] ? row[key].toString() : "";
+                if (val.length > maxLen) maxLen = val.length;
+            });
+            return { wch: Math.max(maxLen + 4, 12) };
+        });
+        worksheet['!cols'] = colWidths;
+
         let workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Data_Pelanggan");
 
@@ -1113,6 +1126,13 @@
         ];
 
         let ws = XLSX.utils.json_to_sheet(summarySheetData);
+
+        // AUTOFIT LEBAR KOLOM UNTUK REKAP
+        ws['!cols'] = [
+            { wch: 35 },
+            { wch: 25 }
+        ];
+
         let wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Rekap_Eksekutif");
 
