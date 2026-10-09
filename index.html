@@ -215,8 +215,12 @@
         </div>
         <input type="email" id="email" class="form-control mb-2" placeholder="Alamat Email Admin">
         <input type="password" id="password" class="form-control mb-3" placeholder="Password Sistem" onkeypress="if(event.key === 'Enter') cekLogin()">
-        <button class="btn btn-primary w-100 fw-bold py-2" onclick="cekLogin()">Masuk Dashboard</button>
-        <p id="error-login" class="text-danger text-center mt-2 mb-0 small hide fw-medium">Gagal Login! Periksa kredensial Anda.</p>
+        
+        <button class="btn btn-primary w-100 fw-bold py-2 mb-2" onclick="cekLogin()">Masuk Dashboard</button>
+        <button class="btn btn-outline-secondary w-100 fw-bold py-1" style="font-size: 0.75rem;" onclick="daftarAdmin()">Belum punya akun? Daftar Admin</button>
+        
+        <p id="error-login" class="text-danger text-center mt-3 mb-0 small hide fw-medium">Pesan Error</p>
+        <p id="success-login" class="text-success text-center mt-3 mb-0 small hide fw-medium">Pesan Sukses</p>
     </div>
 </div>
 
@@ -600,6 +604,7 @@
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         document.getElementById('error-login').classList.add('hide');
+        document.getElementById('success-login').classList.add('hide');
         document.getElementById('loading-overlay').innerText = 'Memverifikasi Akses...';
         document.getElementById('loading-overlay').classList.remove('hide');
 
@@ -612,6 +617,42 @@
         } else {
             document.getElementById('login-screen').classList.add('hide');
             fetchDatabase(); 
+        }
+    }
+
+    // FUNGSI BARU UNTUK DAFTAR AKUN ADMIN
+    async function daftarAdmin() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        
+        document.getElementById('error-login').classList.add('hide');
+        document.getElementById('success-login').classList.add('hide');
+
+        if (!email || !password) {
+            document.getElementById('error-login').innerText = 'Silakan isi Email dan Password untuk mendaftar.';
+            document.getElementById('error-login').classList.remove('hide');
+            return;
+        }
+
+        if (password.length < 6) {
+            document.getElementById('error-login').innerText = 'Password minimal 6 karakter.';
+            document.getElementById('error-login').classList.remove('hide');
+            return;
+        }
+
+        document.getElementById('loading-overlay').innerText = 'Mendaftarkan Akun...';
+        document.getElementById('loading-overlay').classList.remove('hide');
+
+        const { data, error } = await _supabase.auth.signUp({ email, password });
+        
+        document.getElementById('loading-overlay').classList.add('hide');
+
+        if (error) {
+            document.getElementById('error-login').innerText = 'Gagal Mendaftar! ' + error.message;
+            document.getElementById('error-login').classList.remove('hide');
+        } else {
+            document.getElementById('success-login').innerText = 'Pendaftaran Berhasil! Silakan klik tombol Masuk Dashboard.';
+            document.getElementById('success-login').classList.remove('hide');
         }
     }
     
@@ -961,7 +1002,6 @@
 
         let worksheet = XLSX.utils.json_to_sheet(excelRows);
 
-        // OTOMATISASI LEBAR KOLOM (AUTOFIT) AGAR TIDAK TERPOTONG
         const keys = Object.keys(excelRows[0]);
         const colWidths = keys.map(key => {
             let maxLen = key.length;
@@ -1127,7 +1167,6 @@
 
         let ws = XLSX.utils.json_to_sheet(summarySheetData);
 
-        // AUTOFIT LEBAR KOLOM UNTUK REKAP
         ws['!cols'] = [
             { wch: 35 },
             { wch: 25 }
