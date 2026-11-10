@@ -360,11 +360,16 @@
             border-radius: 20px;
             font-weight: 700;
             font-size: 0.72rem;
-            padding: 3px 10px;
+            padding: 4px 12px;
             border: 1px solid transparent;
             cursor: pointer;
             box-shadow: none;
             transition: all 0.15s ease;
+            text-align: center;
+            text-align-last: center; /* Memaksa teks pilihan selalu rata tengah */
+            display: inline-block;
+            width: auto;
+            min-width: 160px;
         }
         .status-pendaftaran { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
         .status-pembayaran { background: #fefce8; color: #a16207; border-color: #fef08a; }
@@ -666,7 +671,7 @@
                             <th>Tgl Pemasangan</th>
                             <th class="text-center">SLA Pasang</th>
                             <th>Data Pemohon</th>
-                            <th style="min-width: 170px;">Status Progres</th>
+                            <th class="text-center" style="min-width: 170px;">Status Progres</th>
                             <th class="text-center" style="min-width: 140px;">Aksi</th>
                         </tr>
                     </thead>
@@ -1219,21 +1224,23 @@
             else if (!basePath.endsWith('/')) basePath += '/';
             const linkTracker = basePath + 'customer_tracking.html?id=' + row.id;
 
-            let btnDetailPasang = (row.status === "Proses Pemasangan") ? `<button class="btn btn-sm btn-light border text-primary fw-bold w-100 mt-1 py-0" style="font-size:0.7rem;" onclick="bukaModalPemasangan('${row.id}')">⚙️ Info Pasang</button>` : '';
+            let btnDetailPasang = (row.status === "Proses Pemasangan") 
+                ? `<button class="btn btn-sm btn-light border text-primary fw-bold mt-1 py-1 d-block mx-auto" style="font-size:0.7rem; min-width: 160px;" onclick="bukaModalPemasangan('${row.id}')">⚙️ Info Pasang</button>` 
+                : '';
 
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td class="text-center text-muted fw-semibold">${nomorUrut++}</td>
-                <td><span class="badge bg-light text-primary border fw-bold">${row.id}</span></td>
-                <td>${tglMasuk}</td>
-                <td>${tglBayarHtml}</td>
-                <td>${tglPasang}</td>
+                <td class="text-center"><span class="badge bg-light text-primary border fw-bold">${row.id}</span></td>
+                <td class="text-center">${tglMasuk}</td>
+                <td class="text-center">${tglBayarHtml}</td>
+                <td class="text-center">${tglPasang}</td>
                 <td class="text-center">${slaHtml}</td>
                 <td>
                     <div class="fw-bold text-dark">${row.nama}</div>
                     <div class="text-muted" style="font-size:0.72rem;">${row.telepon}</div>
                 </td>
-                <td>
+                <td class="text-center">
                     <select class="form-select form-select-sm status-badge-select ${getStatusClass(row.status)}" onchange="updateStatus('${row.id}', this.value)">
                         <option value="Pendaftaran Diterima" ${row.status == 'Pendaftaran Diterima' ? 'selected' : ''}>Pendaftaran Diterima</option>
                         <option value="Pembayaran Diterima" ${row.status == 'Pembayaran Diterima' ? 'selected' : ''}>Pembayaran Diterima</option>
