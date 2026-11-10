@@ -3,89 +3,381 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status Pemasangan Aetra</title>
+    <title>Status Pemasangan Sambungan Baru | Aetra</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
-        .mobile-container { max-width: 480px; margin: 40px auto; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; min-height: 80vh; }
-        .header-app { background-color: #0056b3; padding: 20px; color: white; text-align: center; }
-        .step { position: relative; padding-left: 40px; margin-bottom: 25px; }
-        .step::before { content: ''; position: absolute; left: 14px; top: 25px; bottom: -25px; width: 2px; background-color: #e9ecef; }
-        .step:last-child::before { display: none; }
-        .step-icon { position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; transition: 0.3s; z-index: 2;}
-        .icon-done { background-color: #198754; color: white; } 
-        .icon-active { background-color: #0d6efd; color: white; box-shadow: 0 0 0 4px rgba(13,110,253,0.2); } 
-        .icon-pending { background-color: #e9ecef; color: #6c757d; } 
-        .text-active { color: #0d6efd; font-weight: bold; }
-        .text-pending { color: #adb5bd; }
+        :root {
+            --brand-primary: #0284c7;
+            --brand-primary-dark: #0369a1;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --card-border: #e2e8f0;
+        }
+
+        body {
+            background: linear-gradient(180deg, #e0f2fe 0%, #f8fafc 360px, #f1f5f9 100%);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+            margin: 0;
+            padding: 24px 12px;
+        }
+
+        .tracking-card {
+            max-width: 460px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px -5px rgba(2, 132, 199, 0.12), 0 20px 25px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            overflow: hidden;
+        }
+
+        .hero-banner {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: white;
+            padding: 28px 24px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            right: -20px;
+            bottom: -30px;
+            width: 140px;
+            height: 140px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+        }
+
+        .badge-live {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            background-color: #4ade80;
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+            animation: pulseAnimation 1.6s infinite cubic-bezier(0.66, 0, 0, 1);
+        }
+
+        @keyframes pulseAnimation {
+            0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+
+        .info-pill {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 12px 16px;
+            margin: -20px 20px 20px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 0 24px 10px;
+        }
+
+        .timeline-step {
+            position: relative;
+            padding-left: 48px;
+            padding-bottom: 28px;
+        }
+
+        .timeline-step:last-child {
+            padding-bottom: 8px;
+        }
+
+        .timeline-step::before {
+            content: '';
+            position: absolute;
+            left: 17px;
+            top: 36px;
+            bottom: -4px;
+            width: 2px;
+            background-color: #e2e8f0;
+            transition: background 0.3s ease;
+        }
+
+        .timeline-step:last-child::before {
+            display: none;
+        }
+
+        .timeline-step.completed::before {
+            background-color: #10b981;
+        }
+
+        .step-icon-bubble {
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            background: #f1f5f9;
+            color: #94a3b8;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .step-icon-bubble.completed {
+            background: #10b981;
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+        }
+
+        .step-icon-bubble.active {
+            background: #0284c7;
+            color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.2);
+            animation: bounceSoft 2s infinite ease-in-out;
+        }
+
+        @keyframes bounceSoft {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        .step-title {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 3px;
+        }
+
+        .step-date-tag {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            background: #f8fafc;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+        }
+
+        .step-date-tag.current {
+            background: #e0f2fe;
+            color: #0369a1;
+            border-color: #bae6fd;
+        }
+
+        .sub-details-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 14px;
+            margin-top: 12px;
+        }
+
+        .sub-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .sub-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .sub-dot {
+            width: 6px;
+            height: 6px;
+            background: #0284c7;
+            border-radius: 50%;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        .sla-alert-card {
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 0.75rem;
+            color: #92400e;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .btn-whatsapp-modern {
+            background: #25D366;
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 12px;
+            border-radius: 14px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-whatsapp-modern:hover {
+            background: #20bd5a;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 211, 102, 0.35);
+        }
+
         .hide { display: none !important; }
-        .tgl-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-top: 4px; font-weight: 500;}
-        .loading-text { text-align: center; margin-top: 50px; font-weight: bold; color: #0056b3; }
-        .btn-cs { background-color: #25D366; color: white; border: none; transition: 0.3s; }
-        .btn-cs:hover { background-color: #1DA851; color: white;}
-        .sub-step-box { border-left: 2px solid #0d6efd; padding-left: 15px; margin-left: -20px; margin-top: 15px;}
-        .sub-item { margin-bottom: 12px; }
-        .sub-title { font-size: 13px; font-weight: 700; color: #495057;}
-        .sub-desc { font-size: 12px; color: #6c757d; margin-top: 2px; line-height: 1.4;}
-        .sla-badge { background-color: #fff3cd; color: #856404; font-size: 11px; padding: 6px 10px; border-radius: 6px; border: 1px solid #ffeeba; display: block; width: fit-content; margin-top: 8px; font-weight: 500; line-height: 1.5;}
     </style>
 </head>
 <body>
 
-<div id="loading-screen" class="mobile-container p-5"><h5 class="loading-text">🔄 Mengambil data terbaru...</h5></div>
-<div id="error-screen" class="mobile-container p-5 text-center hide"><h4 class="text-danger mt-5">Data Tidak Ditemukan</h4><p>Link pelacakan tidak valid atau data pendaftaran telah dihapus.</p></div>
+<div class="tracking-card">
+    <!-- LOADING SCREEN -->
+    <div id="loading-screen" class="p-5 text-center">
+        <div class="spinner-border text-primary mb-3" style="width: 2.5rem; height: 2.5rem;" role="status"></div>
+        <h6 class="fw-bold text-dark">Memuat Data Pemasangan</h6>
+        <p class="text-muted small mb-0">Menghubungkan ke server Aetra...</p>
+    </div>
 
-<div id="app-screen" class="mobile-container hide">
-    <div class="header-app"><h5 class="mb-0">Aetra Live Tracking</h5><small id="display-info">No. Form: Memuat... | Memuat...</small></div>
-    <div class="p-4">
-        <h6 class="fw-bold mb-4 text-center">Riwayat & Status Pemasangan</h6>
+    <!-- ERROR SCREEN -->
+    <div id="error-screen" class="p-5 text-center hide">
+        <div style="font-size: 42px;" class="mb-2">📋</div>
+        <h5 class="fw-bold text-danger">Data Tidak Ditemukan</h5>
+        <p class="text-muted small">Tautan pelacakan tidak valid atau nomor pendaftaran belum terdaftar di sistem.</p>
+        <a href="https://wa.me/6287788224645" class="btn btn-outline-primary btn-sm rounded-pill fw-bold px-3">Tanya CS Aetra</a>
+    </div>
 
-        <div class="step" id="step-1"><div class="step-icon">1</div><h6 class="mb-1">Pendaftaran Diterima</h6><span id="tgl-1" class="tgl-badge hide"></span></div>
+    <!-- APP TRACKING CONTENT -->
+    <div id="app-screen" class="hide">
+        <div class="hero-banner">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge-live"><span class="pulse-dot"></span> LIVE TRACKING</span>
+                <span class="small opacity-75" style="font-size: 0.72rem;">Aetra Tangerang</span>
+            </div>
+            <h5 class="fw-bold mb-1">Status Sambungan Baru</h5>
+            <p class="small text-white-50 mb-0">Pemantauan progres pemasangan air bersih secara transparan</p>
+        </div>
 
-        <div class="step" id="step-2">
-            <div class="step-icon">2</div><h6 class="mb-1">Pembayaran Diterima</h6>
-            <span id="tgl-2" class="tgl-badge hide" style="display:block; width:fit-content;"></span>
-
-            <div id="sla-badge" class="sla-badge hide">
-                ⏱️ <strong>Batas maksimal pemasangan: <span id="sla-tgl-max"></span></strong>
+        <div class="info-pill">
+            <div>
+                <div class="text-muted small" style="font-size: 0.68rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Pelanggan</div>
+                <div class="fw-bold text-dark" id="disp-nama">Memuat...</div>
+            </div>
+            <div class="text-end">
+                <div class="text-muted small" style="font-size: 0.68rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">No. Form</div>
+                <div class="badge bg-light text-primary border fw-bold" id="disp-form">...</div>
             </div>
         </div>
 
-        <div class="step" id="step-3">
-            <div class="step-icon">3</div><h6 class="mb-1">Proses Pemasangan</h6>
-            <span id="tgl-3" class="tgl-badge hide" style="display:block; width:fit-content;"></span>
+        <div class="timeline">
+            <!-- STEP 1 -->
+            <div class="timeline-step" id="step-1">
+                <div class="step-icon-bubble">1</div>
+                <div class="step-title">Pendaftaran Diterima</div>
+                <div class="small text-muted mb-1" style="font-size:0.75rem;">Dokumen permohonan telah diverifikasi oleh tim CS.</div>
+                <span id="tgl-1" class="step-date-tag hide"></span>
+            </div>
 
-            <div id="sub-step-container" class="sub-step-box hide">
-                <div id="sub-1" class="sub-item hide">
-                    <div class="sub-title">✔️ Permohonan pemasangan diproses</div>
-                    <div class="sub-desc">Tim kami sedang menyiapkan penugasan pemasangan untuk lokasi Anda.</div>
+            <!-- STEP 2 -->
+            <div class="timeline-step" id="step-2">
+                <div class="step-icon-bubble">2</div>
+                <div class="step-title">Pembayaran Biaya Sambungan</div>
+                <div class="small text-muted mb-1" style="font-size:0.75rem;">Administrasi dan biaya pasang telah terkonfirmasi.</div>
+                <span id="tgl-2" class="step-date-tag hide"></span>
+
+                <div id="sla-badge" class="sla-alert-card hide">
+                    <span>⏱️</span>
+                    <div>
+                        <strong>Target Maksimal SLA:</strong><br>
+                        <span id="sla-tgl-max" class="text-dark fw-bold"></span>
+                    </div>
                 </div>
-                <div id="sub-2" class="sub-item hide">
-                    <div class="sub-title text-primary" id="title-sub2">✔️ Jadwal terkonfirmasi</div>
-                    <div class="sub-desc">Tanggal Pemasangan: <strong id="text-jadwal" class="text-dark"></strong></div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div class="timeline-step" id="step-3">
+                <div class="step-icon-bubble">3</div>
+                <div class="step-title">Pemasangan Pipa & Meteran</div>
+                <div class="small text-muted mb-1" style="font-size:0.75rem;">Instalasi pipa dinas dan pemasangan meter air oleh teknisi.</div>
+                <span id="tgl-3" class="step-date-tag hide"></span>
+
+                <div id="sub-step-container" class="sub-details-card hide">
+                    <div id="sub-1" class="sub-row hide">
+                        <div class="sub-dot"></div>
+                        <div>
+                            <div class="fw-bold" style="font-size:0.78rem;">Surat Perintah Kerja (SPK) Terbit</div>
+                            <div class="text-muted" style="font-size:0.72rem;">Pekerjaan dialokasikan ke tim lapangan/kontraktor pelaksana.</div>
+                        </div>
+                    </div>
+                    <div id="sub-2" class="sub-row hide">
+                        <div class="sub-dot" style="background:#10b981;"></div>
+                        <div>
+                            <div class="fw-bold text-primary" style="font-size:0.78rem;" id="title-sub2">Jadwal Galian Dikonfirmasi</div>
+                            <div class="text-dark fw-semibold" style="font-size:0.72rem;">Tanggal: <span id="text-jadwal"></span></div>
+                        </div>
+                    </div>
+                    <div id="sub-3" class="sub-row hide">
+                        <div class="sub-dot" style="background:#f59e0b;"></div>
+                        <div>
+                            <div class="fw-bold" style="font-size:0.78rem;" id="title-kendala">Laporan Tim Lapangan</div>
+                            <div style="font-size:0.72rem; line-height:1.4;" id="text-kendala"></div>
+                        </div>
+                    </div>
                 </div>
-                <div id="sub-3" class="sub-item hide">
-                    <div class="sub-title" id="title-kendala">⚠️ Pemasangan di lokasi</div>
-                    <div class="sub-desc" id="text-kendala"></div>
-                </div>
+            </div>
+
+            <!-- STEP 4 -->
+            <div class="timeline-step" id="step-4">
+                <div class="step-icon-bubble">4</div>
+                <div class="step-title" id="title-step4">Selesai & Air Mengalir</div>
+                <div class="small text-muted mb-1" style="font-size:0.75rem;">Meteran air aktif dan siap digunakan secara normal.</div>
+                <span id="tgl-4" class="step-date-tag hide"></span>
             </div>
         </div>
 
-        <div class="step" id="step-4"><div class="step-icon">4</div><h6 class="mb-1">Selesai / Air Mengalir</h6><span id="tgl-4" class="tgl-badge hide"></span></div>
-
-        <div class="mt-5 text-center border-top pt-4">
-            <p class="small text-muted mb-2">Butuh bantuan atau informasi lebih lanjut?</p>
-            <a href="https://wa.me/6287788224645" class="btn btn-cs w-100 fw-bold shadow-sm" target="_blank">💬 Hubungi CS Aetra</a>
+        <div class="p-4 pt-2">
+            <a href="https://wa.me/6287788224645" class="btn-whatsapp-modern" target="_blank">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                Bantuan & Layanan CS Aetra
+            </a>
+            <p class="text-center text-muted mt-3 mb-0" style="font-size:0.7rem;">Aetra Smart Connect &bull; PT Aetra Air Tangerang</p>
         </div>
     </div>
 </div>
 
 <script>
-    // ===================================================================
     const SUPABASE_URL = 'https://vyngziqwsdhetapjzlgr.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5bmd6aXF3c2RoZXRhcGp6bGdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4ODE0ODIsImV4cCI6MjEwMjQ1NzQ4Mn0._uJcP6YPkXH6mQmIHW-vrKOZIguHGKI_72zEWYei24s';
-    // ===================================================================
 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const urlParams = new URLSearchParams(window.location.search);
@@ -100,121 +392,134 @@
     }
 
     async function loadDataLive() {
-        if (!customerId) { document.getElementById('loading-screen').classList.add('hide'); document.getElementById('error-screen').classList.remove('hide'); return; }
+        if (!customerId) {
+            document.getElementById('loading-screen').classList.add('hide');
+            document.getElementById('error-screen').classList.remove('hide');
+            return;
+        }
+
         const { data, error } = await _supabase.from('pelanggan').select('*').eq('id', customerId);
         document.getElementById('loading-screen').classList.add('hide');
 
-        if (error || data.length === 0) {
+        if (error || !data || data.length === 0) {
             document.getElementById('error-screen').classList.remove('hide');
-        } else {
-            let customerData = data[0];
-            document.getElementById('app-screen').classList.remove('hide');
-            document.getElementById('display-info').innerText = `No. Form: ${customerData.id} | ${customerData.nama}`;
+            return;
+        }
 
-            const statusMap = { "Pendaftaran Diterima": 1, "Pembayaran Diterima": 2, "Proses Pemasangan": 3, "Selesai": 4 };
-            const currentStep = statusMap[customerData.status];
-            let riwayat = customerData.riwayat_tgl || {};
+        let customerData = data[0];
+        document.getElementById('app-screen').classList.remove('hide');
+        document.getElementById('disp-nama').innerText = customerData.nama;
+        document.getElementById('disp-form').innerText = customerData.id;
 
-            let maxSlaDateStr = "";
-            let isPendingSLA = false;
-            let isTertunda = false;
+        const statusMap = { "Pendaftaran Diterima": 1, "Pembayaran Diterima": 2, "Proses Pemasangan": 3, "Selesai": 4 };
+        const currentStep = statusMap[customerData.status] || 1;
+        let riwayat = customerData.riwayat_tgl || {};
 
-            if (riwayat && riwayat.tgl_bayar_ts) {
-                let start = new Date(riwayat.tgl_bayar_ts);
-                let added = 0;
-                while(added < 14) {
-                    start.setDate(start.getDate() + 1);
-                    if(start.getDay() !== 0 && start.getDay() !== 6) added++;
-                }
-                maxSlaDateStr = formatTanggal(start.toISOString().split('T')[0]);
+        let maxSlaDateStr = "";
+        let isPendingSLA = false;
+        let isTertunda = false;
 
-                start.setHours(23, 59, 59, 999);
-                if (riwayat.detail_pemasangan && riwayat.detail_pemasangan.jadwal) {
-                    let jadwalDate = new Date(riwayat.detail_pemasangan.jadwal);
-                    if (jadwalDate > start) isPendingSLA = true;
-                }
+        if (riwayat && riwayat.tgl_bayar_ts) {
+            let start = new Date(riwayat.tgl_bayar_ts);
+            let added = 0;
+            while(added < 14) {
+                start.setDate(start.getDate() + 1);
+                if(start.getDay() !== 0 && start.getDay() !== 6) added++;
+            }
+            maxSlaDateStr = formatTanggal(start.toISOString().split('T')[0]);
 
-                if (riwayat.detail_pemasangan && riwayat.detail_pemasangan.kondisi === "Tertunda") {
-                    isTertunda = true;
-                }
+            start.setHours(23, 59, 59, 999);
+            if (riwayat.detail_pemasangan && riwayat.detail_pemasangan.jadwal) {
+                let jadwalDate = new Date(riwayat.detail_pemasangan.jadwal);
+                if (jadwalDate > start) isPendingSLA = true;
             }
 
-            for (let i = 1; i <= 4; i++) {
-                let stepDiv = document.getElementById(`step-${i}`);
-                let iconDiv = stepDiv.querySelector('.step-icon');
-                let textTitle = stepDiv.querySelector('h6');
-                let tglBadge = document.getElementById(`tgl-${i}`);
+            if (riwayat.detail_pemasangan && riwayat.detail_pemasangan.kondisi === "Tertunda") {
+                isTertunda = true;
+            }
+        }
 
-                tglBadge.classList.add('hide');
+        for (let i = 1; i <= 4; i++) {
+            let stepDiv = document.getElementById(`step-${i}`);
+            let iconDiv = stepDiv.querySelector('.step-icon-bubble');
+            let tglBadge = document.getElementById(`tgl-${i}`);
 
-                if (i < currentStep) {
-                    iconDiv.className = 'step-icon icon-done'; iconDiv.innerText = '✓';
-                    if(riwayat && riwayat[i] && riwayat[i] !== "") {
-                        tglBadge.innerText = `Selesai: ${riwayat[i].split(',')[0]}`; tglBadge.classList.remove('hide'); tglBadge.style.backgroundColor = '#e9ecef'; tglBadge.style.color = '#495057';
-                    }
-                } else if (i === currentStep) {
-                    if (currentStep === 4) {
-                        iconDiv.className = 'step-icon icon-done'; iconDiv.innerText = '✓';
-                    } else {
-                        iconDiv.className = 'step-icon icon-active'; textTitle.classList.add('text-active');
-                    }
+            tglBadge.classList.add('hide');
 
-                    if(riwayat && riwayat[i] && riwayat[i] !== "") {
-                        tglBadge.innerText = `Diperbarui: ${riwayat[i].split(',')[0]}`; tglBadge.classList.remove('hide'); tglBadge.style.backgroundColor = '#cfe2ff'; tglBadge.style.color = '#0a58ca';
-                    }
+            if (i < currentStep) {
+                stepDiv.classList.add('completed');
+                iconDiv.className = 'step-icon-bubble completed';
+                iconDiv.innerHTML = '&#10003;';
+                if(riwayat && riwayat[i]) {
+                    tglBadge.innerText = `Selesai: ${riwayat[i].split(',')[0]}`;
+                    tglBadge.classList.remove('hide');
+                }
+            } else if (i === currentStep) {
+                if (currentStep === 4) {
+                    stepDiv.classList.add('completed');
+                    iconDiv.className = 'step-icon-bubble completed';
+                    iconDiv.innerHTML = '&#10003;';
                 } else {
-                    iconDiv.className = 'step-icon icon-pending'; textTitle.classList.add('text-pending');
+                    iconDiv.className = 'step-icon-bubble active';
                 }
 
-                if (i === 2 && (currentStep === 2 || currentStep === 3) && riwayat && riwayat.tgl_bayar_ts && !isPendingSLA && !isTertunda) {
-                    document.getElementById('sla-tgl-max').innerText = maxSlaDateStr;
-                    document.getElementById('sla-badge').classList.remove('hide');
+                if(riwayat && riwayat[i]) {
+                    tglBadge.innerText = `Update: ${riwayat[i].split(',')[0]}`;
+                    tglBadge.classList.add('current');
+                    tglBadge.classList.remove('hide');
                 }
+            } else {
+                iconDiv.className = 'step-icon-bubble';
+                iconDiv.innerText = i;
+            }
 
-                if (i === 3 && (currentStep === 3 || currentStep === 4)) {
-                    if (riwayat && riwayat.detail_pemasangan) {
-                        let det = riwayat.detail_pemasangan;
-                        document.getElementById('sub-step-container').classList.remove('hide');
+            if (i === 2 && (currentStep === 2 || currentStep === 3) && riwayat.tgl_bayar_ts && !isPendingSLA && !isTertunda) {
+                document.getElementById('sla-tgl-max').innerText = maxSlaDateStr;
+                document.getElementById('sla-badge').classList.remove('hide');
+            }
 
-                        if (det.tgl_so) document.getElementById('sub-1').classList.remove('hide');
-                        if (det.jadwal) { 
-                            document.getElementById('sub-2').classList.remove('hide'); 
-                            document.getElementById('text-jadwal').innerText = formatTanggal(det.jadwal); 
-                        }
+            if (i === 3 && (currentStep === 3 || currentStep === 4)) {
+                if (riwayat && riwayat.detail_pemasangan) {
+                    let det = riwayat.detail_pemasangan;
+                    document.getElementById('sub-step-container').classList.remove('hide');
 
-                        if (det.kondisi) {
-                            document.getElementById('title-sub2').classList.remove('text-primary');
-                            document.getElementById('sub-3').classList.remove('hide');
-                            let t3 = document.getElementById('title-kendala');
-                            let txt3 = document.getElementById('text-kendala');
+                    if (det.tgl_so) document.getElementById('sub-1').classList.remove('hide');
+                    if (det.jadwal) { 
+                        document.getElementById('sub-2').classList.remove('hide'); 
+                        document.getElementById('text-jadwal').innerText = formatTanggal(det.jadwal); 
+                    }
 
-                            if (det.kondisi === "Sukses") {
-                                t3.innerHTML = `✅ Pemasangan di lokasi`;
-                                txt3.innerHTML = `<span class="text-success fw-bold">[Sukses]</span> Pemasangan telah selesai dilakukan.`;
-                                let s3Icon = document.querySelector('#step-3 .step-icon');
-                                s3Icon.className = 'step-icon icon-done'; s3Icon.innerText = '✓';
+                    if (det.kondisi) {
+                        document.getElementById('sub-3').classList.remove('hide');
+                        let t3 = document.getElementById('title-kendala');
+                        let txt3 = document.getElementById('text-kendala');
 
-                            } else if (det.kondisi === "Gagal") {
-                                t3.innerHTML = `❌ Pemasangan di lokasi`;
-                                txt3.innerHTML = `<span class="text-danger fw-bold">[Gagal]</span> ${det.kategori ? det.kategori + '.' : ''}<br/><i>Catatan: ${det.catatan || '-'}</i>`;
+                        if (det.kondisi === "Sukses") {
+                            t3.innerHTML = `<span class="text-success fw-bold">Instalasi Berhasil</span>`;
+                            txt3.innerHTML = `Pemasangan pipa dinas dan meter air telah selesai di lokasi.`;
+                            let s3Icon = document.querySelector('#step-3 .step-icon-bubble');
+                            s3Icon.className = 'step-icon-bubble completed';
+                            s3Icon.innerHTML = '&#10003;';
+                        } else if (det.kondisi === "Gagal") {
+                            t3.innerHTML = `<span class="text-danger fw-bold">Pemasangan Belum Dapat Dilanjutkan</span>`;
+                            txt3.innerHTML = `<strong>Alasan:</strong> ${det.kategori || '-'}<br><span class="text-muted">Catatan: ${det.catatan || '-'}</span>`;
 
-                                let s4Title = document.querySelector('#step-4 h6');
-                                s4Title.innerHTML = `<span class="text-danger fw-bold">❌ Gagal Melakukan Pemasangan</span>`;
-                                let s4Icon = document.querySelector('#step-4 .step-icon');
-                                s4Icon.className = 'step-icon bg-danger text-white border-danger';
-                                s4Icon.innerText = 'X';
-
-                            } else {
-                                let tambahan = det.tgl_kembali ? `<br/><span class="text-info fw-bold">📅 Dijadwalkan Ulang: ${formatTanggal(det.tgl_kembali)}</span>` : "";
-                                t3.innerHTML = `⚠️ Pemasangan di lokasi`;
-                                txt3.innerHTML = `<span class="text-warning fw-bold" style="color:#d39e00 !important;">[Tertunda]</span> ${det.kategori ? det.kategori + '.' : ''}<br/><i>Catatan: ${det.catatan || '-'}</i>${tambahan}`;
-                            }
+                            let s4Title = document.getElementById('title-step4');
+                            s4Title.innerHTML = `<span class="text-danger">Pemasangan Dibatalkan / Gagal</span>`;
+                            let s4Icon = document.querySelector('#step-4 .step-icon-bubble');
+                            s4Icon.className = 'step-icon-bubble bg-danger text-white border-0';
+                            s4Icon.innerHTML = '&times;';
+                        } else {
+                            let reschedule = det.tgl_kembali ? `<div class="mt-1 text-primary fw-bold">📅 Dijadwalkan Ulang: ${formatTanggal(det.tgl_kembali)}</div>` : "";
+                            t3.innerHTML = `<span class="text-warning fw-bold">Pekerjaan Tertunda Sementara</span>`;
+                            txt3.innerHTML = `<strong>Kendala:</strong> ${det.kategori || '-'}<br><span class="text-muted">Ket: ${det.catatan || '-'}</span>${reschedule}`;
                         }
                     }
                 }
             }
         }
     }
+
     loadDataLive();
 </script>
 </body>
