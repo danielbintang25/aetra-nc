@@ -3,197 +3,447 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aetra - Admin Dashboard NC</title>
+    <title>Aetra Smart Connect &bull; Portal Operasional NC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- FULLCALENDAR JS -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
-        body { 
-            background-color: #f4f6f9; 
-            font-family: 'Inter', sans-serif; 
-            color: #1e293b; 
-            margin: 0; 
-            overflow-x: hidden; 
-            font-size: 0.8125rem;
-        }
-        
-        /* SIDEBAR PUTIH CLEAN */
-        .sidebar { 
-            position: fixed; top: 0; left: 0; width: 220px; height: 100vh; 
-            background: #ffffff; 
-            border-right: 1px solid #e2e8f0; 
-            z-index: 1000; padding: 15px; display: flex; flex-direction: column; transition: transform 0.3s ease; 
-        }
-        .sidebar.collapsed { transform: translateX(-220px); }
-        
-        .sidebar-brand { text-align: center; margin-bottom: 20px; padding: 0; }
-        .sidebar-brand img { max-height: 50px; width: auto; object-fit: contain; display: inline-block; }
-
-        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
-        .sidebar-menu li { margin-bottom: 4px; }
-        .sidebar-menu li a { display: flex; align-items: center; gap: 8px; padding: 8px 12px; color: #64748b; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.8rem; transition: all 0.2s; }
-        .sidebar-menu li.active a, .sidebar-menu li a:hover { background-color: #eff6ff; color: #2563eb; font-weight: 600; }
-
-        .sidebar-footer { margin-top: auto; padding-top: 10px; border-top: 1px solid #f1f5f9; }
-
-        /* MAIN WRAPPER */
-        .main-wrapper { margin-left: 0; min-height: 100vh; display: flex; flex-direction: column; transition: margin-left 0.3s ease; }
-        .main-wrapper:not(.expanded) { margin-left: 220px; }
-
-        .top-header { background-color: #0f172a; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #0f172a; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .hide { display: none !important; }
-        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255,255,255,0.9); z-index: 9998; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; color: #3b82f6;}
-        
-        .section-title-accent {
-            border-left: 3px solid #2563eb;
-            padding-left: 10px;
+        :root {
+            --brand-primary: #0284c7;
+            --brand-primary-dark: #0369a1;
+            --bg-base: #f8fafc;
+            --text-heading: #0f172a;
+            --text-body: #334155;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
         }
 
-        /* KPI CARDS RINGKAS */
-        .kpi-card { border: none; border-radius: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03); padding: 1rem; transition: all 0.25s ease; height: 100%; border-left: 4px solid transparent; }
-        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.06); }
-        .kpi-card-blue { border-left-color: #3b82f6; background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%); }
-        .kpi-card-amber { border-left-color: #d97706; background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%); }
-        .kpi-card-cyan { border-left-color: #0284c7; background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); }
-        .kpi-card-emerald { border-left-color: #16a34a; background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); }
-
-        .kpi-title { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin-bottom: 0.25rem; }
-        .kpi-val { font-size: 1.6rem; font-weight: 700; color: #0f172a; line-height: 1.1; margin-bottom: 0;}
-        .kpi-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05); }
-        
-        .main-container { padding: 1.25rem 1.5rem; flex: 1; }
-        .table-container { background: #ffffff; border-radius: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03); padding: 1rem; border: none; }
-        .table-toolbar { border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem; margin-bottom: 0.75rem; }
-        
-        /* HEADER TABEL & ROW RINGKAS */
-        .table { margin-bottom: 0; }
-        .table thead th { 
-            background-color: #0f172a !important; 
-            color: #ffffff !important; 
-            font-size: 0.7rem; 
-            text-transform: uppercase; 
-            letter-spacing: 0.05em; 
-            font-weight: 600; 
-            border-bottom: 1px solid #e2e8f0; 
-            padding: 0.6rem 0.75rem; 
-            border-top: none; 
-            text-align: center; 
+        body {
+            background-color: var(--bg-base);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-body);
+            margin: 0;
+            overflow-x: hidden;
+            font-size: 0.825rem;
         }
-        .table tbody tr { transition: background-color 0.2s ease; }
-        .table tbody tr:hover { background-color: #f8fafc !important; }
-        .table tbody td { padding: 0.5rem 0.75rem; color: #334155; border-bottom: 1px solid #f1f5f9; vertical-align: middle; font-size: 0.8rem; }
-        
-        /* PILL BADGE STATUS SELECTOR */
-        .status-select-pill {
-            border-radius: 16px !important;
-            font-weight: 600 !important;
-            font-size: 0.72rem !important;
-            padding: 2px 8px !important;
-            text-align: center;
-            border: 1px solid transparent;
-            cursor: pointer;
+
+        /* ================= TAMPILAN LOGIN MODERN ENTERPRISE ================= */
+        #login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 20%, #0369a1 0%, #0b192c 45%, #070e17 100%);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-size: cover;
+        }
+
+        #login-screen::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+            background-size: 28px 28px;
+            pointer-events: none;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 400px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            padding: 32px 28px 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-brand-logo {
+            max-height: 48px;
+            object-fit: contain;
+            margin-bottom: 12px;
+        }
+
+        .badge-security {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            letter-spacing: 0.02em;
+        }
+
+        .form-floating-custom {
+            position: relative;
+        }
+
+        .form-floating-custom .input-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-control-custom {
+            padding-left: 38px !important;
+            padding-right: 38px !important;
+            height: 42px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.825rem;
             transition: all 0.2s ease;
         }
 
-        .status-select-pill option {
-            background-color: #ffffff !important;
-            color: #1e293b !important;
-            font-weight: 500 !important;
+        .form-control-custom:focus {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
         }
 
-        .status-pendaftaran { background-color: #dbeafe !important; color: #1e40af !important; border-color: #bfdbfe !important; }
-        .status-pembayaran { background-color: #fef3c7 !important; color: #92400e !important; border-color: #fde68a !important; }
-        .status-proses { background-color: #e0f2fe !important; color: #0369a1 !important; border-color: #bae6fd !important; }
-        .status-selesai { background-color: #dcfce7 !important; color: #15803d !important; border-color: #bbf7d0 !important; }
+        .toggle-password-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+        }
+        .toggle-password-btn:hover { color: #475569; }
 
-        .form-label { font-weight: 600; color: #475569; margin-bottom: 0.2rem; font-size: 0.75rem; }
-        .form-control, .form-select { border-color: #cbd5e1; border-radius: 6px; box-shadow: none; font-size: 0.78rem; padding: 0.35rem 0.6rem; }
-        .form-control:focus, .form-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1); }
-        .btn { border-radius: 6px; font-weight: 500; font-size: 0.78rem; padding: 0.35rem 0.75rem; }
-        
-        .btn-tambah { display: flex; align-items: center; justify-content: center; height: 32px; width: 100%; font-weight: 600; }
+        .btn-login-submit {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.85rem;
+            height: 42px;
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+            transition: all 0.2s ease;
+        }
+        .btn-login-submit:hover {
+            background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(2, 132, 199, 0.4);
+        }
 
-        /* AKSI CONTAINER UNTUK PRESISI TOMBOL */
-        .action-container {
-            width: 155px;
-            margin: 0 auto;
+        /* ================= SIDEBAR ================= */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 240px;
+            height: 100vh;
+            background: #ffffff;
+            border-right: 1px solid var(--border-color);
+            z-index: 1000;
+            padding: 20px 16px;
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .action-container .btn-group {
-            width: 100%;
+
+        .sidebar.collapsed {
+            transform: translateX(-240px);
         }
-        .btn-action-custom {
-            padding: 2px 4px !important;
-            font-size: 0.7rem !important;
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 20px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-brand img {
+            max-height: 38px;
+            border-radius: 8px;
+        }
+
+        .sidebar-brand-text {
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: var(--text-heading);
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 9px 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 8px;
             font-weight: 600;
-            display: inline-flex;
+            font-size: 0.8rem;
+            transition: all 0.15s ease;
+        }
+
+        .sidebar-menu a svg {
+            width: 17px;
+            height: 17px;
+            stroke-width: 2;
+        }
+
+        .sidebar-menu li.active a, .sidebar-menu a:hover {
+            background-color: #f0f9ff;
+            color: var(--brand-primary);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* ================= MAIN CONTENT ================= */
+        .main-wrapper {
+            margin-left: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .main-wrapper:not(.expanded) {
+            margin-left: 240px;
+        }
+
+        .top-navbar {
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .toggle-btn {
+            background: #f1f5f9;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            gap: 3px;
+            cursor: pointer;
+            transition: 0.2s;
         }
-        .btn-action-custom img, .btn-wa-custom img { width: 11px; height: 11px; object-fit: contain; }
+        .toggle-btn:hover { background: #e2e8f0; }
 
-        .btn-wa-custom {
-            width: 100% !important;
-            padding: 3px 6px !important;
-            font-size: 0.7rem !important;
-            font-weight: 600;
-            border-radius: 4px !important;
-            display: inline-flex;
+        /* KPI BOXES */
+        .kpi-box {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .kpi-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .kpi-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin: 0;
+        }
+        .kpi-icon-wrap {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .kpi-number {
+            font-size: 1.65rem;
+            font-weight: 800;
+            color: var(--text-heading);
+            margin: 0;
+            line-height: 1;
+        }
+
+        /* DATA TABLE PANEL */
+        .data-panel {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 18px;
+        }
+        .table-responsive {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .table-modern {
+            width: 100%;
+            margin-bottom: 0;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .table-modern thead th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+        .table-modern tbody tr { transition: background 0.15s ease; }
+        .table-modern tbody tr:hover { background-color: #f8fafc; }
+        .table-modern tbody td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 0.8rem;
+        }
+
+        /* STATUS BADGE SELECT */
+        .status-badge-select {
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.72rem;
+            padding: 3px 10px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            box-shadow: none;
+            transition: all 0.15s ease;
+        }
+        .status-pendaftaran { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+        .status-pembayaran { background: #fefce8; color: #a16207; border-color: #fef08a; }
+        .status-proses { background: #f0f9ff; color: #0284c7; border-color: #bae6fd; }
+        .status-selesai { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+
+        .sla-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        .sla-warning { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+        .sla-danger { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .sla-success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+        .sla-neutral { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+
+        .action-group {
+            display: flex;
             align-items: center;
             justify-content: center;
             gap: 4px;
-            background-color: #0d9488;
-            color: #ffffff;
+        }
+        .btn-action-icon {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: #ffffff;
+            color: #475569;
+            transition: all 0.15s;
+        }
+        .btn-action-icon:hover {
+            background: #f1f5f9;
+            color: var(--text-heading);
+            border-color: #cbd5e1;
+        }
+        .btn-action-icon svg { width: 14px; height: 14px; }
+
+        .btn-wa-action {
+            background: #0d9488;
+            color: white;
             border: none;
-            box-sizing: border-box !important;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.15s;
         }
-        .btn-wa-custom:hover {
-            background-color: #0f766e;
-            color: #ffffff;
-        }
+        .btn-wa-action:hover { background: #0f766e; color: white; }
+        .btn-wa-action svg { width: 13px; height: 13px; }
 
-        .badge-sla { font-size: 0.7rem; padding: 0.25em 0.5em; border-radius: 4px; font-weight: 600;}
-        .bg-soft-warning { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a;}
-        .bg-soft-danger { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;}
-        .bg-soft-success { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;}
-        .bg-soft-secondary { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;}
-        
-        .modal-content { border-radius: 12px; border: none; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
-        .modal-header { border-bottom: 1px solid #f1f5f9; background: #ffffff; color: #0f172a; border-radius: 12px 12px 0 0; padding: 1rem 1.25rem; }
-        .modal-body { padding: 1.25rem; }
-        .modal-footer { border-top: 1px solid #f1f5f9; padding: 1rem 1.25rem; }
-        .modal-title { font-weight: 700; font-size: 1rem; }
-
-        .chart-container-box { background: #ffffff; border-radius: 10px; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.03); height: 100%; border: 1px solid #f1f5f9; }
-
-        /* FULLCALENDAR CUSTOM STYLING RINGKAS */
-        #calendar {
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            margin: 0 auto;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(4px);
+            z-index: 9998;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--brand-primary);
         }
-        .fc { font-family: 'Inter', sans-serif !important; }
-        .fc .fc-toolbar { display: flex !important; justify-content: space-between !important; align-items: center !important; margin-bottom: 1rem !important; flex-wrap: wrap; gap: 8px; }
-        .fc .fc-toolbar-title { font-size: 1.15rem !important; font-weight: 700 !important; color: #0f172a !important; }
-        .fc .fc-button { background-color: #ffffff !important; border: 1px solid #cbd5e1 !important; color: #475569 !important; font-weight: 600 !important; font-size: 0.75rem !important; padding: 0.35rem 0.65rem !important; border-radius: 6px !important; box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important; transition: all 0.2s ease !important; text-transform: capitalize !important; }
-        .fc .fc-button:hover { background-color: #f1f5f9 !important; color: #0f172a !important; border-color: #94a3b8 !important; }
-        .fc .fc-button-primary:not(:disabled).fc-button-active, .fc .fc-button-primary:not(:disabled):active { background-color: #2563eb !important; border-color: #2563eb !important; color: #ffffff !important; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2) !important; }
-        .fc .fc-col-header-cell { background-color: #f8fafc !important; padding: 6px 0 !important; border-color: #e2e8f0 !important; }
-        .fc .fc-col-header-cell-cushion { color: #475569 !important; text-decoration: none !important; font-weight: 700 !important; font-size: 0.75rem !important; text-transform: uppercase !important; }
-        .fc .fc-daygrid-day-number { color: #334155 !important; text-decoration: none !important; font-weight: 600 !important; font-size: 0.78rem !important; padding: 4px 6px !important; }
-        .fc .fc-daygrid-day.fc-day-today { background-color: #eff6ff !important; }
-        .fc .fc-daygrid-day-frame { min-height: 90px !important; }
-        .fc td, .fc th { border-color: #e2e8f0 !important; }
-        .fc-event { cursor: pointer !important; border-radius: 4px !important; padding: 2px 5px !important; font-size: 0.72rem !important; font-weight: 600 !important; border: none !important; box-shadow: 0 1px 2px rgba(0,0,0,0.08) !important; margin-top: 2px !important; }
+
+        .hide { display: none !important; }
 
         @media print {
             body * { visibility: hidden; }
@@ -205,151 +455,247 @@
 </head>
 <body>
 
-<div id="loading-overlay">Memuat Data Sistem...</div>
+<!-- OVERLAY LOADING -->
+<div id="loading-overlay">
+    <div class="spinner-border text-primary mb-2" role="status"></div>
+    <span id="loading-text">Memproses Data Sistem...</span>
+</div>
 
+<!-- LOGIN SCREEN MODAL -->
 <div id="login-screen">
-    <div class="card p-4 shadow-lg border-0" style="width: 340px; border-radius: 16px; background: #ffffff;">
+    <div class="login-box">
         <div class="text-center mb-3">
-            <h5 class="fw-bold" style="color: #0f172a;">Aetra Connect</h5>
-            <p class="text-muted small mb-0">Admin Workspace Panel</p>
+            <img src="logo.jpg" alt="Aetra Logo" class="login-brand-logo" onerror="this.src='https://placehold.co/120x45/0284c7/white?text=AETRA'">
+            <h5 class="fw-bold text-dark mb-1" style="letter-spacing: -0.02em;">Aetra Smart Connect</h5>
+            <p class="text-muted small mb-2">Workspace Petugas & Operasional NC</p>
+            <span class="badge-security">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Akses Internal &bull; Terenkripsi SSL
+            </span>
         </div>
-        <input type="email" id="email" class="form-control mb-2" placeholder="Alamat Email Admin">
-        <input type="password" id="password" class="form-control mb-3" placeholder="Password Sistem" onkeypress="if(event.key === 'Enter') cekLogin()">
-        
-        <button class="btn btn-primary w-100 fw-bold py-2 mb-2" onclick="cekLogin()">Masuk Dashboard</button>
-        <button class="btn btn-outline-secondary w-100 fw-bold py-1" style="font-size: 0.75rem;" onclick="daftarAdmin()">Belum punya akun? Daftar Admin</button>
-        
-        <p id="error-login" class="text-danger text-center mt-3 mb-0 small hide fw-medium">Pesan Error</p>
-        <p id="success-login" class="text-success text-center mt-3 mb-0 small hide fw-medium">Pesan Sukses</p>
+
+        <div class="mb-3">
+            <label class="form-label small fw-bold text-secondary mb-1">Email Dinas</label>
+            <div class="form-floating-custom">
+                <span class="input-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                </span>
+                <input type="email" id="email" class="form-control form-control-custom" placeholder="nama@aetra.co.id" autocomplete="username">
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label small fw-bold text-secondary mb-1">Kata Sandi</label>
+            <div class="form-floating-custom">
+                <span class="input-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+                <input type="password" id="password" class="form-control form-control-custom" placeholder="••••••••" autocomplete="current-password" onkeypress="if(event.key === 'Enter') cekLogin()">
+                <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility()" title="Lihat/Sembunyikan">
+                    <svg id="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <button class="btn btn-login-submit w-100 mb-2" onclick="cekLogin()">Masuk ke Dashboard</button>
+        <button class="btn btn-light border w-100 fw-bold py-2 text-muted" style="font-size:0.75rem; border-radius: 10px;" onclick="daftarAdmin()">Belum punya akun? Daftar Admin</button>
+
+        <p id="error-login" class="text-danger text-center mt-3 mb-0 small hide fw-semibold"></p>
+        <p id="success-login" class="text-success text-center mt-3 mb-0 small hide fw-semibold"></p>
+
+        <div class="text-center mt-4 pt-3 border-top" style="font-size: 0.68rem; color: #94a3b8;">
+            &copy; 2026 PT Aetra Air Tangerang. All rights reserved.
+        </div>
     </div>
 </div>
 
-<!-- SIDEBAR MENU UTAMA -->
+<!-- SIDEBAR -->
 <div class="sidebar collapsed" id="appSidebar">
     <div>
         <div class="sidebar-brand">
-            <img src="logo.jpg" alt="Aetra Logo">
+            <img src="logo.jpg" alt="Aetra" onerror="this.src='https://placehold.co/40x40/0284c7/white?text=A'">
+            <div>
+                <div class="sidebar-brand-text">Aetra Connect</div>
+                <div class="text-muted" style="font-size: 0.68rem; font-weight: 600;">NC Operational Hub</div>
+            </div>
         </div>
+
         <ul class="sidebar-menu">
-            <li id="navDashboard" class="active"><a href="#" onclick="switchView('dashboard'); return false;">📊 Dashboard</a></li>
-            <li id="navLaporan"><a href="#" onclick="switchView('laporan'); return false;">📋 Laporan Bulanan</a></li>
-            <li id="navKalender"><a href="#" onclick="switchView('kalender'); return false;">📅 Kalender Jadwal</a></li>
+            <li id="navDashboard" class="active">
+                <a href="#" onclick="switchView('dashboard'); return false;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                    Dashboard Utama
+                </a>
+            </li>
+            <li id="navLaporan">
+                <a href="#" onclick="switchView('laporan'); return false;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    Laporan SLA Bulanan
+                </a>
+            </li>
+            <li id="navKalender">
+                <a href="#" onclick="switchView('kalender'); return false;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                    Kalender Jadwal
+                </a>
+            </li>
         </ul>
     </div>
 
     <div class="sidebar-footer">
-        <button class="btn btn-outline-danger w-100 fw-bold py-1" onclick="bukaModalLogout()">
-            Logout
+        <button class="btn btn-outline-danger w-100 fw-bold py-1 btn-sm d-flex align-items-center justify-content-center gap-2" onclick="bukaModalLogout()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+            Keluar Sistem
         </button>
     </div>
 </div>
 
-<!-- MAIN WRAPPER -->
+<!-- MAIN PAGE WRAPPER -->
 <div class="main-wrapper expanded" id="mainWrapper">
-    <div class="top-header">
+    <!-- TOP NAVBAR -->
+    <div class="top-navbar">
         <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-sm text-white fs-6 border-0 p-0 shadow-none" onclick="toggleSidebar()" title="Tutup/Buka Menu">☰</button>
-            <h6 class="m-0 fw-bold fs-6">Aetra Smart Connect</h6>
+            <button class="toggle-btn" onclick="toggleSidebar()" title="Toggle Menu">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" x2="21" y1="6" y2="6"/><line x1="3" x2="21" y1="12" y2="12"/><line x1="3" x2="21" y1="18" y2="18"/></svg>
+            </button>
+            <span class="fw-bold text-dark" style="font-size: 0.9rem;">PT Aetra Air Tangerang &bull; Sambungan Baru</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-light text-dark border fw-medium px-2 py-1" style="font-size: 0.72rem;">SLA Target: 14 Hari Kerja</span>
         </div>
     </div>
 
-    <!-- VIEW 1: DASHBOARD UTAMA -->
-    <div id="viewDashboard" class="container-fluid main-container">
-        <div class="row g-3 mb-3">
+    <!-- VIEW 1: DASHBOARD -->
+    <div id="viewDashboard" class="container-fluid p-4">
+        <div class="row g-3 mb-4">
             <div class="col-md-3">
-                <div class="kpi-card kpi-card-blue">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div><p class="kpi-title">Total Pendaftaran</p><h3 class="kpi-val" id="kpi-total">0</h3></div>
-                        <div class="kpi-icon" style="background:#eff6ff; color:#3b82f6;">📝</div>
+                <div class="kpi-box">
+                    <div class="kpi-header">
+                        <span class="kpi-label">Pendaftaran Masuk</span>
+                        <div class="kpi-icon-wrap" style="background: #eff6ff; color: #2563eb;">📝</div>
                     </div>
+                    <div class="kpi-number" id="kpi-total">0</div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="kpi-card kpi-card-amber">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div><p class="kpi-title">Pembayaran Diterima</p><h3 class="kpi-val" id="kpi-bayar">0</h3></div>
-                        <div class="kpi-icon" style="background:#fef3c7; color:#d97706;">💳</div>
+                <div class="kpi-box">
+                    <div class="kpi-header">
+                        <span class="kpi-label">Pembayaran Lunas</span>
+                        <div class="kpi-icon-wrap" style="background: #fefce8; color: #ca8a04;">💳</div>
                     </div>
+                    <div class="kpi-number text-warning" id="kpi-bayar" style="color: #d97706 !important;">0</div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="kpi-card kpi-card-cyan">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div><p class="kpi-title">Proses Pemasangan</p><h3 class="kpi-val" id="kpi-proses">0</h3></div>
-                        <div class="kpi-icon" style="background:#e0f2fe; color:#0284c7;">⚙️</div>
+                <div class="kpi-box">
+                    <div class="kpi-header">
+                        <span class="kpi-label">Proses Pemasangan</span>
+                        <div class="kpi-icon-wrap" style="background: #f0f9ff; color: #0284c7;">⚙️</div>
                     </div>
+                    <div class="kpi-number text-primary" id="kpi-proses">0</div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="kpi-card kpi-card-emerald">
-                    <div class="d-flex justify-content-between align-items-start mb-1">
-                        <div><p class="kpi-title">Total Selesai</p><h3 class="kpi-val" id="kpi-selesai">0</h3></div>
-                        <div class="kpi-icon" style="background:#dcfce7; color:#16a34a;">✅</div>
+                <div class="kpi-box">
+                    <div class="kpi-header">
+                        <span class="kpi-label">Total Selesai</span>
+                        <div class="kpi-icon-wrap" style="background: #f0fdf4; color: #16a34a;">✅</div>
                     </div>
-                    <div class="d-flex gap-2 pt-1 border-top" style="border-color: rgba(0,0,0,0.05) !important;">
-                        <div><span style="color:#16a34a; font-size:11px; font-weight:600;">✓ Sukses: </span><span class="small fw-bold text-dark" id="kpi-sukses">0</span></div>
-                        <div><span style="color:#dc2626; font-size:11px; font-weight:600;">✕ Gagal: </span><span class="small fw-bold text-dark" id="kpi-gagal">0</span></div>
+                    <div class="d-flex align-items-baseline justify-content-between">
+                        <span class="kpi-number text-success" id="kpi-selesai">0</span>
+                        <div class="small fw-semibold">
+                            <span class="text-success">✓ <span id="kpi-sukses">0</span></span>
+                            <span class="text-danger ms-2">✕ <span id="kpi-gagal">0</span></span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="table-container">
-            <div class="table-toolbar">
-                <div class="row g-2 align-items-end">
-                    <div class="col-md-2"><label class="form-label">Filter Status</label><select id="filterStatus" class="form-select form-select-sm" onchange="renderTabel()"><option value="Semua">Semua Status</option><option value="Pendaftaran Diterima">Pendaftaran Diterima</option><option value="Pembayaran Diterima">Pembayaran Diterima</option><option value="Proses Pemasangan">Proses Pemasangan</option><option value="Selesai">Selesai</option></select></div>
-                    <div class="col-md-2"><label class="form-label">Bulan Masuk</label><select id="filterBulan" class="form-select form-select-sm" onchange="renderTabel()"><option value="Semua">Semua Bulan</option><option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option><option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option></select></div>
-                    <div class="col-md-2"><label class="form-label">Tahun Masuk</label><select id="filterTahun" class="form-select form-select-sm" onchange="renderTabel()"><option value="Semua">Semua Tahun</option><option value="2026">2026</option><option value="2027">2027</option></select></div>
-                    <div class="col-md-2"><label class="form-label">Urutkan Data</label><select id="sortTanggal" class="form-select form-select-sm" onchange="renderTabel()"><option value="baru">Terbaru ke Lama</option><option value="lama">Terlama ke Baru</option></select></div>
-                    <div class="col-md-2"><label class="form-label">Pencarian</label><input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Ketik No. Form / Nama..." onkeyup="renderTabel()"></div>
-                    <div class="col-md-2 text-md-end d-flex gap-1">
-                        <button class="btn btn-outline-success btn-sm btn-tambah" onclick="exportTabelKeExcel()" title="Download Excel Data Terfilter">📥 Export</button>
-                        <button class="btn btn-primary btn-sm btn-tambah" onclick="bukaModalTambah()">+ Tambah</button>
-                    </div>
+        <div class="data-panel">
+            <div class="row g-2 align-items-center mb-3">
+                <div class="col-md-2">
+                    <label class="form-label small text-muted fw-bold mb-1">Status</label>
+                    <select id="filterStatus" class="form-select form-select-sm" onchange="renderTabel()">
+                        <option value="Semua">Semua Status</option>
+                        <option value="Pendaftaran Diterima">Pendaftaran Diterima</option>
+                        <option value="Pembayaran Diterima">Pembayaran Diterima</option>
+                        <option value="Proses Pemasangan">Proses Pemasangan</option>
+                        <option value="Selesai">Selesai</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted fw-bold mb-1">Bulan</label>
+                    <select id="filterBulan" class="form-select form-select-sm" onchange="renderTabel()">
+                        <option value="Semua">Semua Bulan</option>
+                        <option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option>
+                        <option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option>
+                        <option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option>
+                        <option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted fw-bold mb-1">Tahun</label>
+                    <select id="filterTahun" class="form-select form-select-sm" onchange="renderTabel()">
+                        <option value="Semua">Semua Tahun</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted fw-bold mb-1">Pencarian</label>
+                    <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="No. Form / Nama..." onkeyup="renderTabel()">
+                </div>
+                <div class="col-md-4 text-md-end pt-3">
+                    <button class="btn btn-outline-success btn-sm fw-semibold me-1" onclick="exportTabelKeExcel()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                        Export Excel
+                    </button>
+                    <button class="btn btn-primary btn-sm fw-semibold" onclick="bukaModalTambah()">+ Tambah Data</button>
                 </div>
             </div>
-            
-            <div class="overflow-auto" style="border-radius: 6px; border: 1px solid #e2e8f0;">
-                <table class="table align-middle">
+
+            <div class="table-responsive">
+                <table class="table-modern">
                     <thead>
                         <tr>
-                            <th style="width: 45px;">No.</th>
+                            <th style="width: 40px;" class="text-center">No</th>
                             <th>No. Form</th>
                             <th>Tgl Masuk</th>
-                            <th style="min-width: 140px;">Tgl Bayar</th>
-                            <th>Tgl Pasang</th>
-                            <th>SLA Pasang</th>
-                            <th>Pelanggan</th>
-                            <th style="min-width: 160px;">Status</th>
-                            <th class="text-center" style="min-width: 175px;">AKSI</th>
+                            <th>Tgl Bayar</th>
+                            <th>Tgl Pemasangan</th>
+                            <th class="text-center">SLA Pasang</th>
+                            <th>Data Pemohon</th>
+                            <th style="min-width: 170px;">Status Progres</th>
+                            <th class="text-center" style="min-width: 140px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="tabel-pelanggan"></tbody>
                 </table>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-2">
                 <div class="d-flex align-items-center gap-2">
-                    <span class="small text-muted" style="font-size:0.75rem;">Tampilkan</span>
-                    <select id="pageSizeSelect" class="form-select form-select-sm" style="width: 65px; padding:2px 4px; font-size:0.75rem;" onchange="changePageSize()">
+                    <span class="text-muted small">Tampilkan</span>
+                    <select id="pageSizeSelect" class="form-select form-select-sm" style="width: 70px;" onchange="changePageSize()">
                         <option value="10">10</option>
                         <option value="25">25</option>
                         <option value="50">50</option>
                     </select>
-                    <span class="small text-muted" style="font-size:0.75rem;">data per halaman</span>
+                    <span class="text-muted small">baris</span>
                 </div>
                 <div id="paginationContainer" class="btn-group btn-group-sm"></div>
             </div>
         </div>
     </div>
 
-    <!-- VIEW 2: HALAMAN LAPORAN BULANAN -->
-    <div id="viewLaporan" class="container-fluid main-container hide">
+    <!-- VIEW 2: LAPORAN -->
+    <div id="viewLaporan" class="container-fluid p-4 hide">
         <div id="areaCetakHalaman">
-            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                <div class="section-title-accent">
-                    <h5 class="fw-bold mb-0" style="color:#0f172a;">📊 Laporan Bulanan Operasional</h5>
-                    <p class="text-muted small mb-0">Analisis Performa Pemasangan & Kepatuhan SLA</p>
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                <div>
+                    <h5 class="fw-bold text-dark mb-0">Laporan Eksekutif SLA & Pemasangan</h5>
+                    <p class="text-muted small mb-0">Pemantauan efektivitas penanganan sambungan baru per periode</p>
                 </div>
                 <div class="d-flex align-items-center gap-2 no-print">
                     <select id="repBulan" class="form-select form-select-sm" onchange="generateRekapBulanan()" style="width:120px;">
@@ -361,175 +707,204 @@
                     <select id="repTahun" class="form-select form-select-sm" onchange="generateRekapBulanan()" style="width:90px;">
                         <option value="2026">2026</option><option value="2027">2027</option>
                     </select>
-                    <button class="btn btn-success btn-sm fw-bold ms-1" onclick="exportRekapExcelBulanan()">📥 Excel</button>
+                    <button class="btn btn-success btn-sm fw-bold" onclick="exportRekapExcelBulanan()">📥 Download Rekap</button>
                     <button class="btn btn-primary btn-sm fw-bold" onclick="window.print()">🖨️ Cetak PDF</button>
                 </div>
             </div>
 
-            <div class="row g-3 mb-3">
+            <div class="row g-3 mb-4">
                 <div class="col-md-3">
-                    <div class="p-2 border rounded-3 bg-white shadow-sm text-center">
-                        <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.7rem;">Total Pendaftaran</p>
-                        <h4 class="fw-bold text-dark mb-0" id="repTotalReg">0</h4>
+                    <div class="kpi-box text-center">
+                        <div class="kpi-label mb-1">Total Pendaftaran</div>
+                        <h3 class="kpi-number" id="repTotalReg">0</h3>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="p-2 border rounded-3 bg-white shadow-sm text-center">
-                        <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.7rem;">Pembayaran Diterima</p>
-                        <h4 class="fw-bold text-primary mb-0" id="repTotalBayar">0</h4>
-                        <small class="text-muted" id="repKonversiBayar" style="font-size:0.7rem;">Konversi: 0%</small>
+                    <div class="kpi-box text-center">
+                        <div class="kpi-label mb-1">Pembayaran Terkonfirmasi</div>
+                        <h3 class="kpi-number text-primary" id="repTotalBayar">0</h3>
+                        <div class="text-muted small mt-1" id="repKonversiBayar" style="font-size:0.7rem;">Konversi: 0%</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="p-2 border rounded-3 bg-white shadow-sm text-center">
-                        <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.7rem;">Kepatuhan SLA (≤14 Hr)</p>
-                        <h4 class="fw-bold text-success mb-0" id="repSlaRate">0%</h4>
-                        <small class="text-muted" id="repSlaDetail" style="font-size:0.7rem;">0 dari 0 tuntas</small>
+                    <div class="kpi-box text-center">
+                        <div class="kpi-label mb-1">Kepatuhan SLA (&le;14 Hari)</div>
+                        <h3 class="kpi-number text-success" id="repSlaRate">0%</h3>
+                        <div class="text-muted small mt-1" id="repSlaDetail" style="font-size:0.7rem;">0 dari 0 tepat waktu</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="p-2 border rounded-3 bg-white shadow-sm text-center">
-                        <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.7rem;">Tingkat Keberhasilan</p>
-                        <h4 class="fw-bold text-emerald mb-0" id="repSuccessRate" style="color:#10b981;">0%</h4>
-                        <small class="text-muted" id="repSuksesGagalRatio" style="font-size:0.7rem;">0 Sukses / 0 Gagal</small>
+                    <div class="kpi-box text-center">
+                        <div class="kpi-label mb-1">Tingkat Keberhasilan</div>
+                        <h3 class="kpi-number" style="color: #0d9488;" id="repSuccessRate">0%</h3>
+                        <div class="text-muted small mt-1" id="repSuksesGagalRatio" style="font-size:0.7rem;">0 Sukses / 0 Gagal</div>
                     </div>
                 </div>
             </div>
 
-            <div class="row g-3 mb-3">
+            <div class="row g-3">
                 <div class="col-md-6">
-                    <div class="chart-container-box">
-                        <h6 class="fw-bold text-dark mb-1" style="font-size:0.85rem;">Status Pemasangan</h6>
-                        <p class="text-muted small mb-2" style="font-size:0.7rem;">Distribusi status pendaftaran saat ini</p>
-                        <div style="position: relative; height:200px;">
-                            <canvas id="chartStatusCanvas"></canvas>
-                        </div>
+                    <div class="kpi-box">
+                        <h6 class="fw-bold text-dark mb-1">Distribusi Status Pemasangan</h6>
+                        <p class="text-muted small mb-3">Persentase status pada periode yang dipilih</p>
+                        <div style="height:220px; position:relative;"><canvas id="chartStatusCanvas"></canvas></div>
                     </div>
                 </div>
-
                 <div class="col-md-6">
-                    <div class="chart-container-box">
-                        <h6 class="fw-bold text-dark mb-1" style="font-size:0.85rem;">Kepatuhan SLA (14 Hari)</h6>
-                        <p class="text-muted small mb-2" style="font-size:0.7rem;">Rasio penyelesaian tepat waktu vs lewat SLA</p>
-                        <div style="position: relative; height:200px;">
-                            <canvas id="chartSlaCanvas"></canvas>
-                        </div>
+                    <div class="kpi-box">
+                        <h6 class="fw-bold text-dark mb-1">Rasio Kepatuhan SLA Pemasangan</h6>
+                        <p class="text-muted small mb-3">Target penyelesaian maksimal 14 hari kerja</p>
+                        <div style="height:220px; position:relative;"><canvas id="chartSlaCanvas"></canvas></div>
                     </div>
                 </div>
-
-                <div class="col-md-6">
-                    <div class="chart-container-box">
-                        <h6 class="fw-bold text-dark mb-1" style="font-size:0.85rem;">Alasan Kegagalan & Kendala</h6>
-                        <p class="text-muted small mb-2" style="font-size:0.7rem;">Rincian penyebab masalah di lapangan</p>
-                        <div style="position: relative; height:200px;">
-                            <canvas id="chartKendalaCanvas"></canvas>
-                        </div>
+                <div class="col-12">
+                    <div class="kpi-box">
+                        <h6 class="fw-bold text-dark mb-1">Distribusi Kendala di Lapangan</h6>
+                        <p class="text-muted small mb-3">Penyebab pekerjaan tertunda atau gagal</p>
+                        <div style="height:220px; position:relative;"><canvas id="chartKendalaCanvas"></canvas></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- VIEW 3: HALAMAN KALENDER JADWAL -->
-    <div id="viewKalender" class="container-fluid main-container hide">
+    <!-- VIEW 3: KALENDER JADWAL -->
+    <div id="viewKalender" class="container-fluid p-4 hide">
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-            <div class="section-title-accent">
-                <h5 class="fw-bold mb-0" style="color:#0f172a;">📅 Kalender Penjadwalan Pemasangan</h5>
-                <p class="text-muted small mb-0">Pemantauan Jadwal Operasional & Tim Lapangan Secara Visual</p>
+            <div>
+                <h5 class="fw-bold text-dark mb-0">Kalender Operasional Pemasangan</h5>
+                <p class="text-muted small mb-0">Pemetaan jadwal tim dan kontraktor galian secara visual</p>
             </div>
-            <div class="d-flex align-items-center gap-2 small fw-semibold">
-                <span class="badge rounded-pill" style="background:#0284c7; font-size:0.7rem;">🔵 Dalam Proses</span>
-                <span class="badge rounded-pill" style="background:#10b981; font-size:0.7rem;">🟢 Sukses</span>
-                <span class="badge rounded-pill" style="background:#f59e0b; font-size:0.7rem;">🟡 Tertunda</span>
-                <span class="badge rounded-pill" style="background:#ef4444; font-size:0.7rem;">🔴 Gagal</span>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge" style="background:#0284c7;">Proses</span>
+                <span class="badge" style="background:#10b981;">Sukses</span>
+                <span class="badge" style="background:#f59e0b;">Tertunda</span>
+                <span class="badge" style="background:#ef4444;">Gagal</span>
             </div>
         </div>
-
-        <div class="card border-0 shadow-sm p-3 rounded-3 bg-white">
+        <div class="kpi-box p-3">
             <div id="calendar"></div>
         </div>
     </div>
 </div>
 
+<!-- MODAL TAMBAH / EDIT PELANGGAN -->
+<div class="modal fade" id="modalForm" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-bottom">
+        <h6 class="modal-title fw-bold" id="modalTitle">Registrasi Pelanggan Baru</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-3">
+        <div class="mb-2">
+            <label class="form-label small fw-bold">Nomor Form / SPK</label>
+            <input type="text" id="inputNoForm" class="form-control form-control-sm" placeholder="Contoh: 113780">
+        </div>
+        <div class="mb-2">
+            <label class="form-label small fw-bold">Nama Lengkap Pemohon</label>
+            <input type="text" id="inputNama" class="form-control form-control-sm" placeholder="Nama pelanggan">
+        </div>
+        <div class="mb-2">
+            <label class="form-label small fw-bold">No. Telepon / WhatsApp</label>
+            <input type="text" id="inputTelepon" class="form-control form-control-sm" placeholder="08xxxxxxxxxx">
+        </div>
+        <div class="mb-2">
+            <label class="form-label small fw-bold">Alamat Pemasangan</label>
+            <textarea id="inputAlamat" class="form-control form-control-sm" rows="2" placeholder="Alamat lengkap..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer border-top p-2">
+        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary btn-sm fw-bold px-3" onclick="simpanPelanggan()">Simpan Data</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL INFO OPERASIONAL PEMASANGAN -->
+<div class="modal fade" id="modalPemasangan" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-bottom">
+        <h6 class="modal-title fw-bold">Detail Operasional Lapangan</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-3">
+        <input type="hidden" id="pm_id">
+        <div class="p-2 mb-3 rounded bg-light border">
+            <div class="fw-bold small mb-2 text-primary">1. Administrasi Tim Pelaksana</div>
+            <div class="mb-2">
+                <label class="form-label small mb-1">Tanggal Cetak SO</label>
+                <input type="date" id="pm_tgl_so" class="form-control form-control-sm">
+            </div>
+            <div>
+                <label class="form-label small mb-1">Kontraktor / Pelaksana</label>
+                <input type="text" id="pm_kontraktor" class="form-control form-control-sm" placeholder="Nama tim/petugas...">
+            </div>
+        </div>
+
+        <div class="p-2 rounded bg-light border">
+            <div class="fw-bold small mb-2 text-primary">2. Pelaksanaan Lapangan & Pelacakan</div>
+            <div class="mb-2">
+                <label class="form-label small fw-bold mb-1">Rencana Tanggal Pemasangan</label>
+                <input type="date" id="pm_jadwal" class="form-control form-control-sm">
+            </div>
+            <div class="mb-2">
+                <label class="form-label small fw-bold mb-1">Hasil Pelaksanaan</label>
+                <select id="pm_kondisi" class="form-select form-select-sm" onchange="toggleKendala()">
+                    <option value="">-- Menunggu Laporan --</option>
+                    <option value="Sukses">✅ Sukses Terpasang</option>
+                    <option value="Tertunda">⏳ Tertunda / Pending</option>
+                    <option value="Gagal">❌ Gagal / Batal</option>
+                </select>
+            </div>
+            <div id="boxKendala" class="hide mt-2 p-2 bg-white border rounded">
+                <div class="mb-2">
+                    <label class="form-label small text-danger fw-bold mb-1">Kategori Kendala</label>
+                    <select id="pm_kategori" class="form-select form-select-sm">
+                        <option value="">-- Pilih Kendala --</option>
+                        <option value="Pelanggan tidak ada di lokasi / rumah terkunci">Rumah Terkunci / Tidak Ada Orang</option>
+                        <option value="Izin galian belum disetujui (RT/RW/Developer/PUPR)">Izin Galian Belum Terbit (RT/RW/PUPR)</option>
+                        <option value="Kendala teknis di lapangan (cuaca / material)">Cuaca Ekstrem / Material Terhambat</option>
+                        <option value="Membutuhkan perpanjangan jaringan pipa utama">Perlu Perpanjangan Pipa Utama</option>
+                        <option value="Terhalang utilitas lain di bawah tanah (PLN/Gas/Telkom)">Terhalang Utilitas Bawah Tanah</option>
+                        <option value="Instalasi pipa dalam rumah belum siap">Pipa Persil Pelanggan Belum Siap</option>
+                        <option value="Penjadwalan ulang sesuai permintaan pelanggan">Permintaan Reschedule Pelanggan</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div id="boxJadwalUlang" class="mb-2 hide">
+                    <label class="form-label small text-primary fw-bold mb-1">Jadwal Ulang</label>
+                    <input type="date" id="pm_tgl_kembali" class="form-control form-control-sm">
+                </div>
+                <div>
+                    <label class="form-label small fw-bold mb-1">Catatan Tambahan untuk Pelanggan</label>
+                    <textarea id="pm_catatan" class="form-control form-control-sm" rows="2" placeholder="Tuliskan keterangan detail..."></textarea>
+                </div>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer border-top p-2">
+        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary btn-sm fw-bold px-3" onclick="simpanDetailPemasangan()">Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL KONFIRMASI LOGOUT -->
 <div class="modal fade" id="modalLogout" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-sm">
-    <div class="modal-content">
-      <div class="modal-header border-0 pb-0">
-        <h6 class="modal-title fw-bold" style="color:#0f172a;">Konfirmasi Logout</h6>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body text-center py-2">
-        <p class="mb-0 text-muted small">Apakah Anda yakin ingin keluar dari sistem Aetra Smart Connect?</p>
-      </div>
-      <div class="modal-footer border-0 pt-0 d-flex gap-2">
-        <button type="button" class="btn btn-light border btn-sm flex-fill fw-bold text-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-danger btn-sm flex-fill fw-bold" onclick="logout()">Ya, Keluar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL FORM TAMBAH / EDIT -->
-<div class="modal fade" id="modalForm" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header"><h6 class="modal-title" id="modalTitle">Registrasi Baru</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-      <div class="modal-body">
-        <div class="mb-2"><label class="form-label">No. Form</label><input type="text" id="inputNoForm" class="form-control" placeholder="Cth: F-001"></div>
-        <div class="mb-2"><label class="form-label">Nama Lengkap</label><input type="text" id="inputNama" class="form-control" placeholder="Masukkan Nama"></div>
-        <div class="mb-2"><label class="form-label">No. Telepon (WhatsApp)</label><input type="text" id="inputTelepon" class="form-control" placeholder="Cth: 08123456789"></div>
-        <div class="mb-2"><label class="form-label">Alamat Lengkap</label><input type="text" id="inputAlamat" class="form-control" placeholder="Ketik alamat lengkap..."></div>
-      </div>
-      <div class="modal-footer"><button type="button" class="btn btn-light border" data-bs-dismiss="modal">Batal</button><button type="button" id="btnSimpan" class="btn btn-primary" onclick="simpanPelanggan()">Simpan Data</button></div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL DETAIL PEMASANGAN -->
-<div class="modal fade" id="modalPemasangan" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header"><h6 class="modal-title">Detail Operasional</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-      <div class="modal-body">
-        <input type="hidden" id="pm_id">
-        <p class="text-muted small fw-bold text-uppercase mb-2" style="font-size:0.7rem;">1. Data Internal</p>
-        <div class="mb-2"><label class="form-label small">Tanggal Cetak SO (Internal)</label><input type="date" id="pm_tgl_so" class="form-control form-control-sm"></div>
-        <div class="mb-3"><label class="form-label small">Nama Tim/Kontraktor Pelaksana</label><input type="text" id="pm_kontraktor" class="form-control form-control-sm" placeholder="Ketik nama tim..."></div>
-        
-        <p class="text-muted small fw-bold text-uppercase mb-2" style="font-size:0.7rem;">2. Laporan Lapangan (Tampil ke Pelanggan)</p>
-        <div class="mb-2"><label class="form-label small fw-bold" style="color:#0f172a;">Tanggal Pemasangan</label><input type="date" id="pm_jadwal" class="form-control form-control-sm"></div>
-        <div class="mb-2">
-            <label class="form-label small">Kondisi Lapangan</label>
-            <select id="pm_kondisi" class="form-select form-select-sm border-warning" onchange="toggleKendala()">
-                <option value="">-- Belum Ada Laporan --</option>
-                <option value="Sukses">✅ Sukses</option>
-                <option value="Tertunda">⏳ Tertunda</option>
-                <option value="Gagal">❌ Gagal</option>
-            </select>
-        </div>
-        <div id="boxKendala" class="hide p-2 bg-light rounded" style="border: 1px dashed #cbd5e1;">
-            <div class="mb-2">
-                <label class="form-label small text-danger">Kategori Kendala</label>
-                <select id="pm_kategori" class="form-select form-select-sm">
-                    <option value="">-- Pilih Kategori --</option>
-                    <option value="Pelanggan tidak ada di lokasi / rumah terkunci">Pelanggan tidak di lokasi / rumah terkunci</option>
-                    <option value="Izin galian belum disetujui (RT/RW/Developer/PUPR)">Izin galian belum disetujui (RT/RW/Developer/PUPR)</option>
-                    <option value="Kendala teknis di lapangan (cuaca / material)">Kendala teknis di lapangan (cuaca / material)</option>
-                    <option value="Membutuhkan perpanjangan jaringan pipa utama">Membutuhkan perpanjangan jaringan pipa utama</option>
-                    <option value="Terhalang utilitas lain di bawah tanah (PLN/Gas/Telkom)">Terhalang utilitas lain (PLN/Gas/Telkom)</option>
-                    <option value="Instalasi pipa dalam rumah belum siap">Instalasi pipa persil pelanggan belum siap</option>
-                    <option value="Penjadwalan ulang sesuai permintaan pelanggan">Penjadwalan ulang sesuai permintaan pelanggan</option>
-                    <option value="Alamat atau titik lokasi tidak sesuai">Alamat atau titik lokasi tidak sesuai</option>
-                    <option value="Pelanggan mengajukan pembatalan">Pelanggan mengajukan pembatalan</option>
-                    <option value="Lainnya">Lainnya</option>
-                </select>
-            </div>
-            <div id="boxJadwalUlang" class="mb-2 hide"><label class="form-label small text-info">Tanggal Janji/Jadwal Ulang</label><input type="date" id="pm_tgl_kembali" class="form-control form-control-sm"></div>
-            <div class="mb-0"><label class="form-label small">Catatan Tambahan Admin</label><textarea id="pm_catatan" class="form-control form-control-sm" rows="2" placeholder="Ketikan detail untuk dibaca pelanggan..."></textarea></div>
+    <div class="modal-content border-0 shadow">
+      <div class="modal-body text-center p-4">
+        <h6 class="fw-bold mb-2">Konfirmasi Keluar</h6>
+        <p class="text-muted small mb-3">Akhiri sesi operasional Anda saat ini?</p>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-light btn-sm flex-fill" data-bs-dismiss="modal">Batal</button>
+            <button type="button" class="btn btn-danger btn-sm flex-fill fw-bold" onclick="logout()">Ya, Keluar</button>
         </div>
       </div>
-      <div class="modal-footer"><button type="button" class="btn btn-light border" data-bs-dismiss="modal">Tutup</button><button type="button" class="btn btn-primary" onclick="simpanDetailPemasangan()">Update Status</button></div>
     </div>
   </div>
 </div>
@@ -537,7 +912,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const SUPABASE_URL = 'https://vyngziqwsdhetapjzlgr.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5bmd6aXF3c2RoZXRhcGp6bGdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4ODE0ODIsImV4cCI6MjEwMjQ1NzQ4Mn0._uJcP6YPkXH6mQmIHW-vrKOZIguHGKI_72zEWYei24s'; 
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5bmd6aXF3c2RoZXRhcGp6bGdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4ODE0ODIsImV4cCI6MjEwMjQ1NzQ4Mn0._uJcP6YPkXH6mQmIHW-vrKOZIguHGKI_72zEWYei24s';
 
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -556,13 +931,23 @@
     let calendarInstance = null;
 
     function toggleSidebar() {
-        const sidebar = document.getElementById('appSidebar');
-        const mainWrapper = document.getElementById('mainWrapper');
-        sidebar.classList.toggle('collapsed');
-        mainWrapper.classList.toggle('expanded');
+        document.getElementById('appSidebar').classList.toggle('collapsed');
+        document.getElementById('mainWrapper').classList.toggle('expanded');
     }
 
     function bukaModalLogout() { modalLogoutIns.show(); }
+
+    function togglePasswordVisibility() {
+        const pwdInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eye-icon');
+        if (pwdInput.type === 'password') {
+            pwdInput.type = 'text';
+            eyeIcon.innerHTML = `<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>`;
+        } else {
+            pwdInput.type = 'password';
+            eyeIcon.innerHTML = `<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>`;
+        }
+    }
 
     function switchView(viewName) {
         document.getElementById('navDashboard').classList.remove('active');
@@ -604,70 +989,53 @@
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         document.getElementById('error-login').classList.add('hide');
-        document.getElementById('success-login').classList.add('hide');
-        document.getElementById('loading-overlay').innerText = 'Memverifikasi Akses...';
         document.getElementById('loading-overlay').classList.remove('hide');
 
         const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
         document.getElementById('loading-overlay').classList.add('hide');
 
         if (error) {
-            document.getElementById('error-login').innerText = 'Gagal Login! Cek Email/Password Anda.';
+            document.getElementById('error-login').innerText = 'Autentikasi gagal! Periksa email & kata sandi.';
             document.getElementById('error-login').classList.remove('hide');
         } else {
             document.getElementById('login-screen').classList.add('hide');
-            fetchDatabase(); 
+            fetchDatabase();
         }
     }
 
-    // FUNGSI BARU UNTUK DAFTAR AKUN ADMIN
     async function daftarAdmin() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
-        
-        document.getElementById('error-login').classList.add('hide');
-        document.getElementById('success-login').classList.add('hide');
-
-        if (!email || !password) {
-            document.getElementById('error-login').innerText = 'Silakan isi Email dan Password untuk mendaftar.';
+        if (!email || !password || password.length < 6) {
+            document.getElementById('error-login').innerText = 'Email valid & password minimal 6 karakter.';
             document.getElementById('error-login').classList.remove('hide');
             return;
         }
-
-        if (password.length < 6) {
-            document.getElementById('error-login').innerText = 'Password minimal 6 karakter.';
-            document.getElementById('error-login').classList.remove('hide');
-            return;
-        }
-
-        document.getElementById('loading-overlay').innerText = 'Mendaftarkan Akun...';
         document.getElementById('loading-overlay').classList.remove('hide');
-
-        const { data, error } = await _supabase.auth.signUp({ email, password });
-        
+        const { error } = await _supabase.auth.signUp({ email, password });
         document.getElementById('loading-overlay').classList.add('hide');
 
         if (error) {
-            document.getElementById('error-login').innerText = 'Gagal Mendaftar! ' + error.message;
+            document.getElementById('error-login').innerText = error.message;
             document.getElementById('error-login').classList.remove('hide');
         } else {
-            document.getElementById('success-login').innerText = 'Pendaftaran Berhasil! Silakan klik tombol Masuk Dashboard.';
+            document.getElementById('success-login').innerText = 'Pendaftaran sukses! Silakan klik Masuk Portal.';
             document.getElementById('success-login').classList.remove('hide');
         }
     }
-    
-    async function logout() { 
+
+    async function logout() {
         modalLogoutIns.hide();
-        document.getElementById('loading-overlay').innerText = 'Keluar Sistem...';
         document.getElementById('loading-overlay').classList.remove('hide');
-        await _supabase.auth.signOut(); 
-        window.location.reload(); 
+        await _supabase.auth.signOut();
+        window.location.reload();
     }
 
     function getTanggalSekarang() {
         const bln = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Ags","Sep","Okt","Nov","Des"];
         const d = new Date(); 
-        let jam = d.getHours().toString().padStart(2, '0'); let mnt = d.getMinutes().toString().padStart(2, '0');
+        let jam = d.getHours().toString().padStart(2, '0');
+        let mnt = d.getMinutes().toString().padStart(2, '0');
         return `${d.getDate()} ${bln[d.getMonth()]} ${d.getFullYear()}, ${jam}:${mnt} WIB`;
     }
 
@@ -683,15 +1051,16 @@
         if(!ts) return "";
         let d = new Date(ts);
         if (isNaN(d.getTime())) return "";
-        let year = d.getFullYear();
-        let month = String(d.getMonth() + 1).padStart(2, '0');
-        let day = String(d.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
     function hitungHariKerja(startDateTs) {
-        let start = new Date(startDateTs); let today = new Date(); let count = 0;
-        let cur = new Date(start); cur.setHours(0,0,0,0); today.setHours(0,0,0,0);
+        let start = new Date(startDateTs);
+        let today = new Date();
+        let count = 0;
+        let cur = new Date(start);
+        cur.setHours(0,0,0,0);
+        today.setHours(0,0,0,0);
         while(cur <= today) {
             let day = cur.getDay();
             if(day !== 0 && day !== 6) count++;
@@ -706,22 +1075,18 @@
         let added = 0;
         while(added < 14) {
             start.setDate(start.getDate() + 1);
-            let day = start.getDay();
-            if(day !== 0 && day !== 6) added++;
+            if(start.getDay() !== 0 && start.getDay() !== 6) added++;
         }
         start.setHours(23, 59, 59, 999);
-        let jadwal = new Date(jadwalStr);
-        return jadwal > start;
+        return new Date(jadwalStr) > start;
     }
 
     async function fetchDatabase() {
-        document.getElementById('loading-overlay').innerText = 'Memuat Data Sistem...';
         document.getElementById('loading-overlay').classList.remove('hide');
         const { data, error } = await _supabase.from('pelanggan').select('*');
-        if (error) { alert("Koneksi ke Database Gagal!"); console.error(error); } 
-        else { 
-            dbPelanggan = data; 
-            renderTabel(); 
+        if (!error && data) {
+            dbPelanggan = data;
+            renderTabel();
             if (!document.getElementById('viewKalender').classList.contains('hide')) {
                 renderKalender();
             }
@@ -765,12 +1130,13 @@
         document.getElementById("kpi-sukses").innerText = totalSukses;
         document.getElementById("kpi-gagal").innerText = totalGagal;
 
-        const tbody = document.getElementById("tabel-pelanggan"); tbody.innerHTML = ""; 
-        let fStatus = document.getElementById("filterStatus").value; 
-        let fBulan = document.getElementById("filterBulan").value; 
-        let fTahun = document.getElementById("filterTahun").value; 
-        let fSort = document.getElementById("sortTanggal").value;
-        let searchQ = document.getElementById("searchInput").value.toLowerCase(); 
+        const tbody = document.getElementById("tabel-pelanggan");
+        tbody.innerHTML = "";
+
+        let fStatus = document.getElementById("filterStatus").value;
+        let fBulan = document.getElementById("filterBulan").value;
+        let fTahun = document.getElementById("filterTahun").value;
+        let searchQ = document.getElementById("searchInput").value.toLowerCase();
 
         let dataTampil = dbPelanggan.filter(p => {
             let passStatus = (fStatus === "Semua") || (p.status === fStatus);
@@ -781,24 +1147,16 @@
             return passStatus && passBulan && passTahun && passSearch;
         });
 
-        dataTampil.sort((a, b) => fSort === "baru" ? (b.tgl_buat - a.tgl_buat) : (a.tgl_buat - b.tgl_buat));
+        dataTampil.sort((a, b) => (b.tgl_buat - a.tgl_buat));
         filteredDataTerakhir = dataTampil;
 
-        let totalData = dataTampil.length;
-        if (totalData === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="9" class="text-center py-4 text-muted">
-                        <div class="fs-4 mb-1">🔍</div>
-                        <p class="mb-0 fw-semibold text-dark small">Tidak ada data pelanggan yang ditemukan</p>
-                    </td>
-                </tr>
-            `;
+        if (dataTampil.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted">Tidak ada data pendaftaran ditemukan.</td></tr>`;
             document.getElementById("paginationContainer").innerHTML = "";
             return;
         }
 
-        let totalPages = Math.ceil(totalData / pageSize) || 1;
+        let totalPages = Math.ceil(dataTampil.length / pageSize) || 1;
         if (currentPage > totalPages) currentPage = totalPages;
         let startIndex = (currentPage - 1) * pageSize;
         let paginatedData = dataTampil.slice(startIndex, startIndex + pageSize);
@@ -810,12 +1168,12 @@
             let tglBayarHtml = "-";
             if (row.riwayat_tgl && row.riwayat_tgl.tgl_bayar_ts) {
                 let isoVal = getIsoDateFromTs(row.riwayat_tgl.tgl_bayar_ts);
-                tglBayarHtml = `<input type="date" class="form-control form-control-sm text-success fw-bold shadow-sm" value="${isoVal}" onchange="updateTglBayar('${row.id}', this.value)" style="width: 125px; font-size: 0.75rem; margin: 0 auto; padding: 1px 4px; border: 1px solid #86efac;">`;
+                tglBayarHtml = `<input type="date" class="form-control form-control-sm text-success fw-bold border-success-subtle" value="${isoVal}" onchange="updateTglBayar('${row.id}', this.value)" style="width: 125px; font-size:0.75rem; padding: 2px 4px;">`;
             } else if (row.status !== "Pendaftaran Diterima") {
                 let isoToday = getIsoDateFromTs(Date.now());
-                tglBayarHtml = `<input type="date" class="form-control form-control-sm text-muted" value="${isoToday}" onchange="updateTglBayar('${row.id}', this.value)" style="width: 125px; font-size: 0.75rem; margin: 0 auto; padding: 1px 4px;">`;
+                tglBayarHtml = `<input type="date" class="form-control form-control-sm text-muted" value="${isoToday}" onchange="updateTglBayar('${row.id}', this.value)" style="width: 125px; font-size:0.75rem; padding: 2px 4px;">`;
             }
-            
+
             let maxSlaDateStr = "-";
             if (row.riwayat_tgl && row.riwayat_tgl.tgl_bayar_ts) {
                 let start = new Date(row.riwayat_tgl.tgl_bayar_ts);
@@ -829,9 +1187,9 @@
 
             let tglPasang = "-";
             if (row.riwayat_tgl && row.riwayat_tgl.detail_pemasangan && row.riwayat_tgl.detail_pemasangan.jadwal) {
-                tglPasang = `<span class="fw-bold" style="color: #0f172a;">${formatTanggal(row.riwayat_tgl.detail_pemasangan.jadwal)}</span>`;
+                tglPasang = `<span class="fw-bold text-dark">${formatTanggal(row.riwayat_tgl.detail_pemasangan.jadwal)}</span>`;
             } else if (maxSlaDateStr !== "-") {
-                tglPasang = `<span style="color: #64748b;">Batas: ${maxSlaDateStr}</span>`;
+                tglPasang = `<span class="text-muted" style="font-size:0.72rem;">Batas: ${maxSlaDateStr}</span>`;
             }
 
             let slaHtml = "-";
@@ -842,47 +1200,41 @@
                 }
 
                 if (pendingStatus) {
-                    slaHtml = `<span class="badge-sla bg-soft-secondary">Pending</span>`;
+                    slaHtml = `<span class="sla-tag sla-neutral">Pending</span>`;
                 } else {
                     let hKerja = hitungHariKerja(row.riwayat_tgl.tgl_bayar_ts);
-                    if (hKerja <= 14) { slaHtml = `<span class="badge-sla bg-soft-warning">Hr ke-${hKerja}/14</span>`; } 
-                    else { slaHtml = `<span class="badge-sla bg-soft-danger">Lewat (${hKerja}/14)</span>`; }
+                    if (hKerja <= 14) {
+                        slaHtml = `<span class="sla-tag sla-warning">Hr ${hKerja}/14</span>`;
+                    } else {
+                        slaHtml = `<span class="sla-tag sla-danger">Lewat (${hKerja}/14)</span>`;
+                    }
                 }
-            } else if (row.status === "Selesai") { 
+            } else if (row.status === "Selesai") {
                 let isGagal = row.riwayat_tgl && row.riwayat_tgl.detail_pemasangan && row.riwayat_tgl.detail_pemasangan.kondisi === "Gagal";
-                if (isGagal) {
-                    slaHtml = `<span class="badge-sla bg-soft-danger">Gagal</span>`;
-                } else {
-                    slaHtml = `<span class="badge-sla bg-soft-success">Tuntas</span>`; 
-                }
+                slaHtml = isGagal ? `<span class="sla-tag sla-danger">Gagal</span>` : `<span class="sla-tag sla-success">Tuntas</span>`;
             }
 
             let basePath = window.location.href.split('?')[0];
-            if (basePath.endsWith('index.html')) {
-                basePath = basePath.substring(0, basePath.lastIndexOf('/') + 1);
-            } else if (!basePath.endsWith('/')) {
-                basePath += '/';
-            }
+            if (basePath.endsWith('index.html')) basePath = basePath.substring(0, basePath.lastIndexOf('/') + 1);
+            else if (!basePath.endsWith('/')) basePath += '/';
             const linkTracker = basePath + 'customer_tracking.html?id=' + row.id;
 
-            let btnDetailPasang = (row.status === "Proses Pemasangan") ? `<button class="btn btn-sm btn-light border w-100 fw-bold mt-1" onclick="bukaModalPemasangan('${row.id}')" style="color:#0284c7; font-size:0.7rem; padding: 2px 4px;">⚙️ Info Pemasangan</button>` : '';
-
-            let statusClass = getStatusClass(row.status);
+            let btnDetailPasang = (row.status === "Proses Pemasangan") ? `<button class="btn btn-sm btn-light border text-primary fw-bold w-100 mt-1 py-0" style="font-size:0.7rem;" onclick="bukaModalPemasangan('${row.id}')">⚙️ Info Pasang</button>` : '';
 
             const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td class="fw-bold text-center text-muted">${nomorUrut++}</td>
-                <td class="fw-bold text-center" style="color:#3b82f6;">${row.id}</td>
-                <td class="text-center">${tglMasuk}</td>
-                <td class="text-center">${tglBayarHtml}</td>
-                <td class="text-center">${tglPasang}</td>
+                <td class="text-center text-muted fw-semibold">${nomorUrut++}</td>
+                <td><span class="badge bg-light text-primary border fw-bold">${row.id}</span></td>
+                <td>${tglMasuk}</td>
+                <td>${tglBayarHtml}</td>
+                <td>${tglPasang}</td>
                 <td class="text-center">${slaHtml}</td>
                 <td>
                     <div class="fw-bold text-dark">${row.nama}</div>
-                    <div class="small text-muted" style="font-size:0.75rem;">${row.telepon}</div>
+                    <div class="text-muted" style="font-size:0.72rem;">${row.telepon}</div>
                 </td>
                 <td>
-                    <select class="form-select form-select-sm status-select-pill ${statusClass}" onchange="updateStatus('${row.id}', this.value)">
+                    <select class="form-select form-select-sm status-badge-select ${getStatusClass(row.status)}" onchange="updateStatus('${row.id}', this.value)">
                         <option value="Pendaftaran Diterima" ${row.status == 'Pendaftaran Diterima' ? 'selected' : ''}>Pendaftaran Diterima</option>
                         <option value="Pembayaran Diterima" ${row.status == 'Pembayaran Diterima' ? 'selected' : ''}>Pembayaran Diterima</option>
                         <option value="Proses Pemasangan" ${row.status == 'Proses Pemasangan' ? 'selected' : ''}>Proses Pemasangan</option>
@@ -891,20 +1243,19 @@
                     ${btnDetailPasang}
                 </td>
                 <td class="text-center">
-                    <div class="action-container">
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-secondary btn-action-custom" onclick="bukaModalEdit('${row.id}')">
-                                <img src="pencil.png" alt="Edit"> Edit
-                            </button>
-                            <button class="btn btn-outline-danger btn-action-custom" onclick="hapusPelanggan('${row.id}')">
-                                <img src="trash.png" alt="Hapus"> Hapus
-                            </button>
-                            <a href="${linkTracker}" target="_blank" class="btn btn-outline-primary btn-action-custom">
-                                <img src="link.png" alt="Link"> Link
-                            </a>
-                        </div>
-                        <button class="btn btn-wa-custom" onclick="kirimWA('${row.id}', '${linkTracker}')">
-                            <img src="whatsapp.png" alt="WA"> Kirim WA
+                    <div class="action-group">
+                        <button class="btn-action-icon" title="Edit Data" onclick="bukaModalEdit('${row.id}')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                        </button>
+                        <button class="btn-action-icon text-danger" title="Hapus" onclick="hapusPelanggan('${row.id}')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                        <a href="${linkTracker}" target="_blank" class="btn-action-icon text-primary" title="Buka Tracking">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                        </a>
+                        <button class="btn-wa-action" title="Kirim Link ke WA" onclick="kirimWA('${row.id}', '${linkTracker}')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                            WA
                         </button>
                     </div>
                 </td>
@@ -915,7 +1266,7 @@
         let pagContainer = document.getElementById("paginationContainer");
         pagContainer.innerHTML = `
             <button class="btn btn-outline-secondary" onclick="gantiHalaman(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>&lt;</button>
-            <button class="btn btn-primary active" style="min-width: 30px;">${currentPage}</button>
+            <button class="btn btn-primary active">${currentPage}</button>
             <button class="btn btn-outline-secondary" onclick="gantiHalaman(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>&gt;</button>
         `;
     }
@@ -934,7 +1285,6 @@
                 else if (det.kondisi === 'Gagal') color = '#ef4444';
 
                 let timLabel = det.kontraktor ? ` (${det.kontraktor})` : '';
-
                 events.push({
                     id: p.id,
                     title: `${p.id} - ${p.nama}${timLabel}`,
@@ -946,7 +1296,7 @@
             }
         });
 
-        if (calendarInstance) { calendarInstance.destroy(); }
+        if (calendarInstance) calendarInstance.destroy();
 
         calendarInstance = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
@@ -957,19 +1307,12 @@
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,listWeek'
             },
-            buttonText: {
-                today: 'Hari Ini',
-                month: 'Bulan',
-                week: 'Minggu',
-                list: 'Agenda'
-            },
+            buttonText: { today: 'Hari Ini', month: 'Bulan', week: 'Minggu', list: 'Agenda' },
             events: events,
             eventClick: function(info) {
-                let pId = info.event.id;
-                if (pId) { bukaModalPemasangan(pId); }
+                if (info.event.id) bukaModalPemasangan(info.event.id);
             }
         });
-
         calendarInstance.render();
     }
 
@@ -987,37 +1330,23 @@
             return {
                 "No": idx + 1,
                 "No. Form": p.id,
-                "Nama Pelanggan": p.nama,
-                "No. WhatsApp": p.telepon,
+                "Nama Pemohon": p.nama,
+                "WhatsApp": p.telepon,
                 "Alamat": p.alamat,
-                "Status Pemasangan": p.status,
-                "Tgl Masuk": tglMasuk,
+                "Status Progres": p.status,
+                "Tgl Registrasi": tglMasuk,
                 "Tgl Bayar": tglBayar,
-                "Tgl Pemasangan": det.jadwal ? formatTanggal(det.jadwal) : "-",
-                "Kondisi Lapangan": det.kondisi || "-",
+                "Jadwal Pasang": det.jadwal ? formatTanggal(det.jadwal) : "-",
+                "Hasil Lapangan": det.kondisi || "-",
                 "Kategori Kendala": det.kategori || "-",
-                "Catatan Admin": det.catatan || "-"
+                "Catatan Lapangan": det.catatan || "-"
             };
         });
 
         let worksheet = XLSX.utils.json_to_sheet(excelRows);
-
-        const keys = Object.keys(excelRows[0]);
-        const colWidths = keys.map(key => {
-            let maxLen = key.length;
-            excelRows.forEach(row => {
-                let val = row[key] ? row[key].toString() : "";
-                if (val.length > maxLen) maxLen = val.length;
-            });
-            return { wch: Math.max(maxLen + 4, 12) };
-        });
-        worksheet['!cols'] = colWidths;
-
         let workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Data_Pelanggan");
-
-        let tglStr = new Date().toISOString().split('T')[0];
-        XLSX.writeFile(workbook, `Laporan_Pelanggan_Aetra_${tglStr}.xlsx`);
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Data_Sambungan_Baru");
+        XLSX.writeFile(workbook, `Aetra_NC_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
     function generateRekapBulanan() {
@@ -1080,14 +1409,10 @@
                 labels: ['Sukses', 'Gagal', 'Dalam Proses'],
                 datasets: [{
                     data: [sukses, gagal, proses],
-                    backgroundColor: ['#10b981', '#ef4444', '#3b82f6']
+                    backgroundColor: ['#10b981', '#ef4444', '#0284c7']
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } }
-            }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
         });
 
         const ctx2 = document.getElementById('chartSlaCanvas').getContext('2d');
@@ -1101,49 +1426,35 @@
                     backgroundColor: ['#10b981', '#f59e0b']
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } }
-            }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
         });
 
         const ctx3 = document.getElementById('chartKendalaCanvas').getContext('2d');
         if (chartKendalaInstance) chartKendalaInstance.destroy();
 
-        let labelsKendala = Object.keys(kendalaCounts);
-        let valuesKendala = Object.values(kendalaCounts);
-        if (labelsKendala.length === 0) {
-            labelsKendala = ['Tidak ada kendala'];
-            valuesKendala = [0];
+        let labels = Object.keys(kendalaCounts);
+        let values = Object.values(kendalaCounts);
+        if (labels.length === 0) {
+            labels = ['Tidak ada kendala'];
+            values = [0];
         }
 
         chartKendalaInstance = new Chart(ctx3, {
             type: 'bar',
             data: {
-                labels: labelsKendala,
+                labels: labels,
                 datasets: [{
                     label: 'Jumlah Kasus',
-                    data: valuesKendala,
+                    data: values,
                     backgroundColor: '#0284c7',
-                    borderRadius: 4,
-                    maxBarThickness: 32
+                    borderRadius: 6
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: {
-                            font: { size: 9 },
-                            callback: function(val) {
-                                let label = this.getLabelForValue(val);
-                                return label.length > 18 ? label.substr(0, 18) + '...' : label;
-                            }
-                        }
-                    },
+                    x: { ticks: { font: { size: 9 }, callback: function(val) { let l = this.getLabelForValue(val); return l.length > 20 ? l.substr(0, 20) + '...' : l; } } },
                     y: { beginAtZero: true, ticks: { precision: 0 } }
                 },
                 plugins: { legend: { display: false } }
@@ -1155,48 +1466,72 @@
         let blnSelected = document.getElementById("repBulan").value;
         let thnSelected = document.getElementById("repTahun").value;
         const listBlnName = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-        
+
         let summarySheetData = [
-            { "Indikator": "Periode Laporan", "Nilai": `${listBlnName[blnSelected]} ${thnSelected}` },
-            { "Indikator": "Total Pendaftaran", "Nilai": document.getElementById("repTotalReg").innerText },
-            { "Indikator": "Pembayaran Diterima", "Nilai": document.getElementById("repTotalBayar").innerText },
-            { "Indikator": "Tingkat Konversi Pembayaran", "Nilai": document.getElementById("repKonversiBayar").innerText },
-            { "Indikator": "Tingkat Keberhasilan Pemasangan", "Nilai": document.getElementById("repSuccessRate").innerText },
-            { "Indikator": "Kepatuhan SLA (<= 14 Hari Kerja)", "Nilai": document.getElementById("repSlaRate").innerText }
+            { "Indikator": "Periode", "Nilai": `${listBlnName[blnSelected]} ${thnSelected}` },
+            { "Indikator": "Total Permohonan", "Nilai": document.getElementById("repTotalReg").innerText },
+            { "Indikator": "Pembayaran Masuk", "Nilai": document.getElementById("repTotalBayar").innerText },
+            { "Indikator": "Konversi Pembayaran", "Nilai": document.getElementById("repKonversiBayar").innerText },
+            { "Indikator": "Tingkat Keberhasilan", "Nilai": document.getElementById("repSuccessRate").innerText },
+            { "Indikator": "Kepatuhan SLA (≤14 Hari)", "Nilai": document.getElementById("repSlaRate").innerText }
         ];
 
         let ws = XLSX.utils.json_to_sheet(summarySheetData);
-
-        ws['!cols'] = [
-            { wch: 35 },
-            { wch: 25 }
-        ];
-
         let wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Rekap_Eksekutif");
-
-        XLSX.writeFile(wb, `Rekap_Eksekutif_Aetra_${listBlnName[blnSelected]}_${thnSelected}.xlsx`);
+        XLSX.writeFile(wb, `Laporan_Eksekutif_${listBlnName[blnSelected]}_${thnSelected}.xlsx`);
     }
 
-    function bukaModalTambah() { modeEditId = null; document.getElementById("modalTitle").innerText = "Registrasi Baru"; document.getElementById("inputNoForm").value = ""; document.getElementById("inputNoForm").disabled = false; document.getElementById("inputNama").value = ""; document.getElementById("inputTelepon").value = ""; document.getElementById("inputAlamat").value = ""; modalInstance.show(); }
-    function bukaModalEdit(id) { modeEditId = id; let i = findIndexById(id); document.getElementById("modalTitle").innerText = "Edit Data Pelanggan"; document.getElementById("inputNoForm").value = dbPelanggan[i].id; document.getElementById("inputNoForm").disabled = true; document.getElementById("inputNama").value = dbPelanggan[i].nama; document.getElementById("inputTelepon").value = dbPelanggan[i].telepon; document.getElementById("inputAlamat").value = dbPelanggan[i].alamat; modalInstance.show(); }
+    function bukaModalTambah() {
+        modeEditId = null;
+        document.getElementById("modalTitle").innerText = "Registrasi Baru";
+        document.getElementById("inputNoForm").value = "";
+        document.getElementById("inputNoForm").disabled = false;
+        document.getElementById("inputNama").value = "";
+        document.getElementById("inputTelepon").value = "";
+        document.getElementById("inputAlamat").value = "";
+        modalInstance.show();
+    }
+
+    function bukaModalEdit(id) {
+        modeEditId = id;
+        let p = dbPelanggan[findIndexById(id)];
+        document.getElementById("modalTitle").innerText = "Edit Data Pelanggan";
+        document.getElementById("inputNoForm").value = p.id;
+        document.getElementById("inputNoForm").disabled = true;
+        document.getElementById("inputNama").value = p.nama;
+        document.getElementById("inputTelepon").value = p.telepon;
+        document.getElementById("inputAlamat").value = p.alamat;
+        modalInstance.show();
+    }
 
     async function simpanPelanggan() {
-        let noForm = document.getElementById("inputNoForm").value, nama = document.getElementById("inputNama").value, telepon = document.getElementById("inputTelepon").value, alamat = document.getElementById("inputAlamat").value;
-        if(noForm === "" || nama === "" || telepon === "" || alamat === "") { alert("Wajib diisi semua!"); return; }
+        let noForm = document.getElementById("inputNoForm").value.trim();
+        let nama = document.getElementById("inputNama").value.trim();
+        let telepon = document.getElementById("inputTelepon").value.trim();
+        let alamat = document.getElementById("inputAlamat").value.trim();
+
+        if(!noForm || !nama || !telepon || !alamat) { alert("Semua bidang wajib diisi!"); return; }
         document.getElementById('loading-overlay').classList.remove('hide');
 
         if (modeEditId === null) {
-            if (dbPelanggan.find(p => p.id === noForm)) { alert("Nomor Form sudah terdaftar!"); document.getElementById('loading-overlay').classList.add('hide'); return; }
-            let riwayat = {"1": getTanggalSekarang(), "2": "", "3": "", "4": ""};
-            
-            const { error } = await _supabase.from('pelanggan').insert([{ id: noForm, nama: nama, telepon: telepon, alamat: alamat, status: "Pendaftaran Diterima", tgl_buat: Date.now(), riwayat_tgl: riwayat }]);
-            if (error) { alert("Gagal menyimpan data! Akses ditolak oleh server."); document.getElementById('loading-overlay').classList.add('hide'); return; }
+            if (dbPelanggan.find(p => p.id === noForm)) {
+                alert("Nomor Form telah terdaftar!");
+                document.getElementById('loading-overlay').classList.add('hide');
+                return;
+            }
+            let riwayat = { "1": getTanggalSekarang(), "2": "", "3": "", "4": "" };
+            const { error } = await _supabase.from('pelanggan').insert([{
+                id: noForm, nama: nama, telepon: telepon, alamat: alamat, status: "Pendaftaran Diterima", tgl_buat: Date.now(), riwayat_tgl: riwayat
+            }]);
+            if (error) alert("Gagal menyimpan data!");
         } else {
             const { error } = await _supabase.from('pelanggan').update({ nama: nama, telepon: telepon, alamat: alamat }).eq('id', modeEditId);
-            if (error) { alert("Gagal memperbarui data! Akses ditolak."); document.getElementById('loading-overlay').classList.add('hide'); return; }
+            if (error) alert("Gagal update data!");
         }
-        modalInstance.hide(); fetchDatabase(); 
+
+        modalInstance.hide();
+        fetchDatabase();
     }
 
     async function updateTglBayar(id, newDateISO) {
@@ -1213,8 +1548,7 @@
         let mnt = new Date().getMinutes().toString().padStart(2, '0');
         riwayatBaru["2"] = `${selectedDate.getDate()} ${bln[selectedDate.getMonth()]} ${selectedDate.getFullYear()}, ${jam}:${mnt} WIB`;
 
-        const { error } = await _supabase.from('pelanggan').update({ riwayat_tgl: riwayatBaru }).eq('id', id);
-        if (error) { alert("Gagal memperbarui tanggal pembayaran!"); }
+        await _supabase.from('pelanggan').update({ riwayat_tgl: riwayatBaru }).eq('id', id);
         fetchDatabase();
     }
 
@@ -1223,28 +1557,24 @@
         let index = findIndexById(id);
         let riwayatBaru = dbPelanggan[index].riwayat_tgl || {};
         
-        if (!riwayatBaru["1"]) { riwayatBaru["1"] = getTanggalSekarang(); }
+        if (!riwayatBaru["1"]) riwayatBaru["1"] = getTanggalSekarang();
 
         const statusMap = { "Pendaftaran Diterima": 1, "Pembayaran Diterima": 2, "Proses Pemasangan": 3, "Selesai": 4 };
         let stepAktif = statusMap[statusBaru];
         
-        if (stepAktif > 1) { riwayatBaru[stepAktif.toString()] = getTanggalSekarang(); }
+        if (stepAktif > 1) riwayatBaru[stepAktif.toString()] = getTanggalSekarang();
+        for (let i = stepAktif + 1; i <= 4; i++) riwayatBaru[i.toString()] = "";
 
-        for (let i = stepAktif + 1; i <= 4; i++) { riwayatBaru[i.toString()] = ""; }
+        if (stepAktif < 3) delete riwayatBaru.detail_pemasangan;
+        if (stepAktif < 2) delete riwayatBaru["tgl_bayar_ts"];
+        else if (!riwayatBaru["tgl_bayar_ts"]) riwayatBaru["tgl_bayar_ts"] = Date.now();
 
-        if (stepAktif < 3) { delete riwayatBaru.detail_pemasangan; }
-        
-        if (stepAktif < 2) { 
-            delete riwayatBaru["tgl_bayar_ts"]; 
-        } else if (!riwayatBaru["tgl_bayar_ts"]) {
-            riwayatBaru["tgl_bayar_ts"] = Date.now();
-        }
-
-        const { error } = await _supabase.from('pelanggan').update({ status: statusBaru, riwayat_tgl: riwayatBaru }).eq('id', id);
-        if (error) { alert("Gagal update status!"); }
-        
+        await _supabase.from('pelanggan').update({ status: statusBaru, riwayat_tgl: riwayatBaru }).eq('id', id);
         fetchDatabase();
-        if (statusBaru === "Proses Pemasangan") { setTimeout(() => { bukaModalPemasangan(id); }, 500); }
+
+        if (statusBaru === "Proses Pemasangan") {
+            setTimeout(() => { bukaModalPemasangan(id); }, 400);
+        }
     }
 
     function toggleKendala() {
@@ -1284,19 +1614,16 @@
             tgl_kembali: document.getElementById('pm_tgl_kembali').value
         };
 
-        const { error } = await _supabase.from('pelanggan').update({ riwayat_tgl: riwayatBaru }).eq('id', id);
-        if (error) { alert("Gagal update data!"); }
-        
+        await _supabase.from('pelanggan').update({ riwayat_tgl: riwayatBaru }).eq('id', id);
         modalPemasanganIns.hide();
         fetchDatabase();
     }
 
     async function hapusPelanggan(id) {
-        if(confirm("Yakin ingin menghapus secara permanen?")) { 
-            document.getElementById('loading-overlay').classList.remove('hide'); 
-            const { error } = await _supabase.from('pelanggan').delete().eq('id', id); 
-            if (error) { alert("Gagal menghapus data!"); document.getElementById('loading-overlay').classList.add('hide'); }
-            else { fetchDatabase(); }
+        if(confirm(`Hapus permanen nomor form ${id}?`)) {
+            document.getElementById('loading-overlay').classList.remove('hide');
+            await _supabase.from('pelanggan').delete().eq('id', id);
+            fetchDatabase();
         }
     }
 
